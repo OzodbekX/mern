@@ -1,15 +1,30 @@
 # Node.js
 node_modules/
 **/node_modules/
+.npm
+.eslintcache
 
 # Build output
 build/
 dist/
+.vite/
+.cache/
+
+# Logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Test coverage
+coverage/
 
 # Environment variables
 .env
+.env.local
 .env.*.local
+!.env.example
 
 # OS files
 .DS_Store
