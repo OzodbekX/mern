@@ -4,7 +4,9 @@ const express = require("express");
 const sequelize = require("./db");
 const PORT = process.env.PORT || 5000;
 const models = require("./models/models");
+
 const app = express();
+
 const start = async () => {
     try {
         await sequelize.authenticate();
