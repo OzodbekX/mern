@@ -3,12 +3,16 @@ const ApiError = require("../error/apiError");
 class TypeController {
     async getAll(req, res) {
         const types = await Type.findAll();
-        return res.status(200).json(types); 
-        res.status(200).json({ message: "Hello from type getAll!" });
+        console.log("Types retrieved:", types);
+        return res.status(200).json(types);
     }
 
     async getOne(req, res) {
-        res.status(200).json({ message: "Hello from type getOne!", id: req.params.id });
+        const type = await Type.findByPk(req.params.id);
+        if (!type) {
+            return res.status(404).json({ message: "Type not found" });
+        }
+        return res.status(200).json(type);
     }
 
     async create(req, res) {
