@@ -3,7 +3,6 @@ const ApiError = require("../error/apiError");
 class TypeController {
     async getAll(req, res) {
         const types = await Type.findAll();
-        console.log("Types retrieved:", types);
         return res.status(200).json(types);
     }
 

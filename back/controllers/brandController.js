@@ -1,4 +1,4 @@
-const {Brand} = require("../models/models");
+const { Brand } = require("../models/models");
 
 class BrandController {
     async getAll(req, res) {
@@ -13,11 +13,21 @@ class BrandController {
 
     async create(req, res) {
         const { name } = req.body;
+
         if (!name) {
             return res.status(400).json({ message: "Brand name is required" });
         }
-        const brand = await Brand.create({ name });
-        return res.status(201).json({ message: "Brand created successfully!", brand });
+
+        try {
+            const brand = await Brand.create({ name });
+            return res.status(201).json({ message: "Brand created successfully!", brand });
+        } catch (error) {
+            if (error.name === 'SequelizeUniqueConstraintError') {
+                return res.status(409).json({ message: "A brand with this name already exists" });
+            }
+
+            return res.status(500).json({ message: "Internal server error", error: error.message });
+        }
     }
 
     async update(req, res) {
