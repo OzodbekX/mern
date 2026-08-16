@@ -117,7 +117,7 @@ export default function Marketplace() {
   const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   return <main>
-    <Header brands={brands} types={types} cartCount={cartCount} onBrandSelect={id => setUrlFilters({ brandId: id })} onTypeSelect={id => setUrlFilters({ typeId: id })} onAccountOpen={() => setAuthOpen(true)} onCartOpen={() => setCartOpen(true)}/>
+    <Header brands={brands} types={types} cartCount={cartCount} onAccountOpen={() => setAuthOpen(true)} onCartOpen={() => setCartOpen(true)}/>
     <HeroView/>
     <ValueStrip/>
     <CatalogView devices={shownDevices} brands={brands} types={types} loading={loading} error={error} query={query} sort={sort} brandId={brandId} typeId={typeId} favorites={favorites} count={count} page={page} onQuery={setQuery} onSort={setSort} onBrand={value => setUrlFilters({ brandId: value })} onType={value => setUrlFilters({ typeId: value })} onClear={clearFilters} onSelect={setSelected} onFavorite={toggleFavorite} onAdd={addToCart} onPage={setPage}/>

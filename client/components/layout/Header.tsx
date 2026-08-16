@@ -1,13 +1,14 @@
 "use client";
 
 import type { Taxonomy } from "@/lib/api";
+import Link from "next/link";
+import { localizedPath, useI18n } from "@/lib/i18n";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 type HeaderProps = {
   brands: Taxonomy[];
   types: Taxonomy[];
   cartCount: number;
-  onBrandSelect: (id: number) => void;
-  onTypeSelect: (id: number) => void;
   onAccountOpen: () => void;
   onCartOpen: () => void;
 };
@@ -21,35 +22,32 @@ function HeaderIcon({ name }: { name: "search" | "user" | "bag" }) {
   return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>{paths[name]}</svg>;
 }
 
-export default function Header({ brands, types, cartCount, onBrandSelect, onTypeSelect, onAccountOpen, onCartOpen }: HeaderProps) {
-  const selectAndScroll = (callback: () => void) => {
-    callback();
-    document.getElementById("shop")?.scrollIntoView({ behavior: "smooth" });
-  };
-
+export default function Header({ brands, types, cartCount, onAccountOpen, onCartOpen }: HeaderProps) {
+  const { locale, t } = useI18n();
   return <>
     <div className="announcement">Complimentary delivery on orders over $150 <span>Explore the edit →</span></div>
     <header className="header">
-      <a href="#top" className="logo">ATELIER<span>MARKET</span></a>
+      <Link href={localizedPath(locale,"/")} className="logo">ATELIER<span>MARKET</span></Link>
       <nav>
-        <a href="#shop">New arrivals</a>
+        <a href="#shop">{t.newArrivals}</a>
         <div className="nav-menu">
-          <button>Brands <span>⌄</span></button>
+          <button>{t.brands} <span>⌄</span></button>
           <div className="nav-dropdown">
-            <p>Shop by maker</p>
-            {brands.length ? brands.map(item => <button key={item.id} onClick={() => selectAndScroll(() => onBrandSelect(item.id))}>{item.name}<span>→</span></button>) : <small>No brands yet</small>}
+            <p>{t.shopByMaker}</p>
+            {brands.length ? brands.map(item => <Link key={item.id} href={localizedPath(locale,`/brands/${item.id}`)}>{item.name}<span>→</span></Link>) : <small>{t.noBrands}</small>}
           </div>
         </div>
         <div className="nav-menu">
-          <button>Categories <span>⌄</span></button>
+          <button>{t.categories} <span>⌄</span></button>
           <div className="nav-dropdown">
-            <p>Shop by category</p>
-            {types.length ? types.map(item => <button key={item.id} onClick={() => selectAndScroll(() => onTypeSelect(item.id))}>{item.name}<span>→</span></button>) : <small>No categories yet</small>}
+            <p>{t.shopByCategory}</p>
+            {types.length ? types.map(item => <Link key={item.id} href={localizedPath(locale,`/types/${item.id}`)}>{item.name}<span>→</span></Link>) : <small>{t.noCategories}</small>}
           </div>
         </div>
-        <a href="#story">Our story</a>
+        <a href="#story">{t.story}</a>
       </nav>
       <div className="header-actions">
+        <LanguageSwitcher/>
         <button aria-label="Search" onClick={() => document.getElementById("search")?.focus()}><HeaderIcon name="search"/></button>
         <button aria-label="Account" onClick={onAccountOpen}><HeaderIcon name="user"/></button>
         <button aria-label="Shopping bag" className="count-button" onClick={onCartOpen}><HeaderIcon name="bag"/><b>{cartCount}</b></button>
