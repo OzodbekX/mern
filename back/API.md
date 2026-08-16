@@ -42,6 +42,10 @@ Tokens expire after 24 hours. Except where noted below, the current routes are p
 | POST | `/device` | Public | Create a device with an image |
 | PUT | `/device/:id` | Public | Placeholder device update |
 | DELETE | `/device/:id` | Public | Placeholder device deletion |
+| GET | `/basket` | Bearer token | Get the current user's basket |
+| POST | `/basket` | Bearer token | Add a device to the basket |
+| DELETE | `/basket/:deviceId` | Bearer token | Remove a device from the basket |
+| DELETE | `/basket` | Bearer token | Clear the basket |
 
 ## Users
 
@@ -390,6 +394,62 @@ DELETE /api/device/:id
 ```
 
 This endpoint does not delete from the database yet. It returns `200` with a placeholder message and the requested ID.
+
+## Basket
+
+All basket endpoints require a valid bearer token. The user is taken from the token, so clients do not send a user or basket ID.
+
+### Get the basket
+
+```http
+GET /api/basket
+Authorization: Bearer <token>
+```
+
+Returns the current user's basket with its basket-device records and nested device details. A basket is created automatically if the user does not have one.
+
+### Add a device
+
+```http
+POST /api/basket
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+Request body:
+
+```json
+{
+  "deviceId": 1
+}
+```
+
+Returns the updated basket. The response status is `201` when the device is added and `200` when it was already present. Returns `404` when the device does not exist.
+
+### Remove a device
+
+```http
+DELETE /api/basket/:deviceId
+Authorization: Bearer <token>
+```
+
+Returns the updated basket, or `404` when the basket or basket item does not exist.
+
+### Clear the basket
+
+```http
+DELETE /api/basket
+Authorization: Bearer <token>
+```
+
+Success response (`200`):
+
+```json
+{
+  "message": "Basket cleared successfully!",
+  "removed": 3
+}
+```
 
 ## Notes about current behavior
 
