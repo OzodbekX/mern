@@ -75,8 +75,14 @@ export default function Marketplace() {
 
   const setUrlFilters = (next: { brandId?: number | null; typeId?: number | null }) => {
     const params = new URLSearchParams(searchParams.toString());
-    if ("brandId" in next) next.brandId ? params.set("brandId", String(next.brandId)) : params.delete("brandId");
-    if ("typeId" in next) next.typeId ? params.set("typeId", String(next.typeId)) : params.delete("typeId");
+    if ("brandId" in next) {
+      if (next.brandId) params.set("brandId", String(next.brandId));
+      else params.delete("brandId");
+    }
+    if ("typeId" in next) {
+      if (next.typeId) params.set("typeId", String(next.typeId));
+      else params.delete("typeId");
+    }
     const nextQuery = params.toString();
     window.history.pushState(null, "", nextQuery ? `?${nextQuery}` : window.location.pathname);
     setPage(1);
