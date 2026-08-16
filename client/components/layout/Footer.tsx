@@ -1,0 +1,3 @@
+export default function Footer() {
+  return <footer><div className="footer-brand"><a href="#top" className="logo">ATELIER<span>MARKET</span></a><p>Everyday objects,<br/>considered differently.</p></div><div><b>Shop</b><a href="#shop">New arrivals</a><a href="#shop">All products</a><a href="#shop">Makers</a></div><div><b>About</b><a href="#story">Our story</a><a href="#">Journal</a><a href="#">Contact</a></div><div className="newsletter"><b>Notes from the atelier</b><p>Occasional stories, objects, and inspiration.</p><form><input type="email" placeholder="Your email address"/><button type="button" aria-label="Subscribe">→</button></form></div></footer>;
+}

@@ -3,28 +3,47 @@ const path = require('path')
 const { Device, DeviceInfo } = require('../models/models')
 const ApiError = require('../error/apiError')
 class DeviceController {
-    async getAll(req, res) {
-        let { brandId, typeId, limit, page } = req.query
-        page = page || 1
-        limit = limit || 9
-        let offset = limit * page - limit
-        let devices
-        if (!brandId && !typeId) {
-            devices = await Device.findAndCountAll({ limit, offset })
+    async getAll(req, res, next) {
+        try {
+            const { brandId, typeId, page = 1, limit = 9 } = req.query
+            const numericPage = Number(page)
+            const numericLimit = Number(limit)
 
-        } else if (brandId && !typeId) {
-            devices = await Device.findAndCountAll({ where: { brandId, limit, offset } })
+            if (!Number.isInteger(numericPage) || numericPage < 1) {
+                return next(ApiError.badRequest('Page must be a positive integer'))
+            }
+            if (!Number.isInteger(numericLimit) || numericLimit < 1) {
+                return next(ApiError.badRequest('Limit must be a positive integer'))
+            }
 
-        } else if (typeId && !brandId) {
-            devices = await Device.findAndCountAll({ where: { typeId, limit, offset } })
+            const where = {}
 
+            if (brandId !== undefined) {
+                const numericBrandId = Number(brandId)
+                if (!Number.isInteger(numericBrandId) || numericBrandId < 1) {
+                    return next(ApiError.badRequest('Brand ID must be a positive integer'))
+                }
+                where.brandId = numericBrandId
+            }
 
-        } else if (brandId, typeId) {
-            devices = await Device.findAndCountAll({ where: { typeId, brandId, limit, offset } })
+            if (typeId !== undefined) {
+                const numericTypeId = Number(typeId)
+                if (!Number.isInteger(numericTypeId) || numericTypeId < 1) {
+                    return next(ApiError.badRequest('Type ID must be a positive integer'))
+                }
+                where.typeId = numericTypeId
+            }
 
+            const devices = await Device.findAndCountAll({
+                where,
+                limit: numericLimit,
+                offset: numericLimit * (numericPage - 1)
+            })
 
+            return res.json(devices)
+        } catch (error) {
+            return next(ApiError.badRequest(error.message))
         }
-        return res.json(devices);
     }
 
     async getOne(req, res, next) {
