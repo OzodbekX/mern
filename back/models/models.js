@@ -12,6 +12,24 @@ const Basket = sequlize.define("basket", {
 const BasketDevice = sequlize.define("basket_device", {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true }
 });
+const UserCard = sequlize.define("user_card", {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    holderName: { type: DataTypes.STRING, allowNull: false },
+    brand: { type: DataTypes.STRING, allowNull: false },
+    last4: { type: DataTypes.STRING(4), allowNull: false },
+    expiryMonth: { type: DataTypes.INTEGER, allowNull: false },
+    expiryYear: { type: DataTypes.INTEGER, allowNull: false },
+    isDefault: { type: DataTypes.BOOLEAN, defaultValue: false }
+});
+const Order = sequlize.define("order", {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    transactionId: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, unique: true },
+    items: { type: DataTypes.JSONB, allowNull: false },
+    amount: { type: DataTypes.DECIMAL(12, 2), allowNull: false },
+    cardLast4: { type: DataTypes.STRING(4), allowNull: false },
+    verificationCode: { type: DataTypes.STRING(6), allowNull: false },
+    status: { type: DataTypes.STRING, defaultValue: "PENDING_VERIFICATION" }
+});
 const Device = sequlize.define("device", {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     name: { type: DataTypes.STRING, unique: true, allowNull: false },
@@ -44,6 +62,12 @@ const TypeBrand = sequlize.define("type_brand", {
 User.hasOne(Basket);
 Basket.belongsTo(User);
 
+User.hasMany(UserCard);
+UserCard.belongsTo(User);
+
+User.hasMany(Order);
+Order.belongsTo(User);
+
 User.hasMany(Rating);
 Rating.belongsTo(User);
 
@@ -72,6 +96,8 @@ module.exports = {
     User,
     Basket,
     BasketDevice,
+    UserCard,
+    Order,
     Device,
     Type,
     Brand,

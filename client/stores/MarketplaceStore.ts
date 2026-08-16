@@ -1,5 +1,5 @@
 import { computed, makeAutoObservable, runInAction } from "mobx";
-import { api, type Device, type Taxonomy } from "@/lib/api";
+import { api, type Basket, type Device, type Taxonomy } from "@/lib/api";
 import type { CartItem } from "@/components/modals/CartDrawer";
 
 export class MarketplaceStore {
@@ -40,7 +40,12 @@ export class MarketplaceStore {
 
   async initialize() {
     try {
-      this.cart = JSON.parse(localStorage.getItem("atelier-cart") || "[]");
+      const token = localStorage.getItem("atelier-token");
+      if (token) {
+        const basket = await api.basket.get(token);
+        this.cart = this.basketToCart(basket);
+      } else this.cart = [];
+      localStorage.removeItem("atelier-cart");
       this.favorites = JSON.parse(localStorage.getItem("atelier-favorites") || "[]");
     } catch {}
     try {
@@ -73,23 +78,25 @@ export class MarketplaceStore {
   setCartOpen(value: boolean) { this.cartOpen = value; }
   setAuthOpen(value: boolean) { this.authOpen = value; }
 
-  saveCart(next: CartItem[]) {
-    this.cart = next;
-    localStorage.setItem("atelier-cart", JSON.stringify(next));
+  private basketToCart(basket: Basket): CartItem[] {
+    return (basket.basket_devices || []).filter(item => item.device).map(item => ({ ...item.device, quantity: 1 }));
   }
 
-  addToCart(device: Device) {
-    const existing = this.cart.find(item => item.id === device.id);
-    this.saveCart(existing
-      ? this.cart.map(item => item.id === device.id ? { ...item, quantity: item.quantity + 1 } : item)
-      : [...this.cart, { ...device, quantity: 1 }]);
+  async addToCart(device: Device) {
+    const token = localStorage.getItem("atelier-token");
+    if (!token) { this.authOpen = true; return; }
+    const basket = await api.basket.add(device.id, token);
+    runInAction(() => { this.cart = this.basketToCart(basket); });
     this.toast = `${device.name} added to your bag`;
     clearTimeout(this.toastTimer);
     this.toastTimer = setTimeout(() => runInAction(() => { this.toast = ""; }), 2400);
   }
 
-  updateCart(id: number, delta: number) {
-    this.saveCart(this.cart.map(item => item.id === id ? { ...item, quantity: item.quantity + delta } : item).filter(item => item.quantity > 0));
+  async updateCart(id: number, delta: number) {
+    const token = localStorage.getItem("atelier-token");
+    if (!token) { this.authOpen = true; return; }
+    const basket = delta < 0 ? await api.basket.remove(id, token) : await api.basket.add(id, token);
+    runInAction(() => { this.cart = this.basketToCart(basket); });
   }
 
   toggleFavorite(id: number) {

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { api, type Basket, type Device, type Taxonomy } from "@/lib/api";
+import { api, type Basket, type Device, type Taxonomy, type User } from "@/lib/api";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { HeroView, ValueStrip } from "@/components/views/HeroView";
@@ -40,15 +40,24 @@ export default function Marketplace() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [favorites, setFavorites] = useState<number[]>([]);
   const [toast, setToast] = useState("");
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     Promise.resolve().then(() => {
       try {
         const token = localStorage.getItem("atelier-token");
         if (token) {
-          api.basket.get(token).then(basket => setCart(basketToCart(basket))).catch(() => localStorage.removeItem("atelier-token"));
+          api.users.authenticate(token).then(result => {
+            localStorage.setItem("atelier-token", result.token);
+            setUser(result.user);
+            return api.basket.get(result.token);
+          }).then(basket => setCart(basketToCart(basket))).catch(() => {
+            localStorage.removeItem("atelier-token");
+            setUser(null);
+          });
         } else {
-          setCart(JSON.parse(localStorage.getItem("atelier-cart") || "[]"));
+          setCart([]);
+          localStorage.removeItem("atelier-cart");
         }
         setFavorites(JSON.parse(localStorage.getItem("atelier-favorites") || "[]"));
       } catch {}
@@ -96,26 +105,20 @@ export default function Marketplace() {
     setPage(1);
   };
 
-  const saveCart = (next: CartItem[]) => {
-    setCart(next);
-    localStorage.setItem("atelier-cart", JSON.stringify(next));
-  };
-
   const addToCart = async (device: Device) => {
     const token = localStorage.getItem("atelier-token");
-    if (token) {
-      try {
-        const basket = await api.basket.add(device.id, token);
-        setCart(basketToCart(basket));
-      } catch (error) {
-        setToast(error instanceof Error ? error.message : "Could not update your basket");
-        return;
-      }
-    } else {
-    const existing = cart.find(item => item.id === device.id);
-    saveCart(existing
-      ? cart.map(item => item.id === device.id ? { ...item, quantity: item.quantity + 1 } : item)
-      : [...cart, { ...device, quantity: 1 }]);
+    if (!token) {
+      setToast("Sign in to add items to your basket");
+      setAuthOpen(true);
+      setTimeout(() => setToast(""), 2400);
+      return;
+    }
+    try {
+      const basket = await api.basket.add(device.id, token);
+      setCart(basketToCart(basket));
+    } catch (error) {
+      setToast(error instanceof Error ? error.message : "Could not update your basket");
+      return;
     }
     setToast(`${device.name} added to your bag`);
     setTimeout(() => setToast(""), 2400);
@@ -130,7 +133,8 @@ export default function Marketplace() {
       } catch (error) { setToast(error instanceof Error ? error.message : "Could not update your basket"); }
       return;
     }
-    saveCart(cart.map(item => item.id === id ? { ...item, quantity: item.quantity + delta } : item).filter(item => item.quantity > 0));
+    setCart([]);
+    setAuthOpen(true);
   };
 
   const clearCart = async () => {
@@ -138,17 +142,23 @@ export default function Marketplace() {
     if (token) {
       try { await api.basket.clear(token); setCart([]); }
       catch (error) { setToast(error instanceof Error ? error.message : "Could not clear your basket"); }
-    } else saveCart([]);
+    } else setCart([]);
   };
 
   const loadAuthenticatedBasket = async (token: string) => {
-    const guestCart = cart;
     try {
-      for (const item of guestCart) await api.basket.add(item.id, token);
-      const basket = await api.basket.get(token);
+      const auth = await api.users.authenticate(token);
+      localStorage.setItem("atelier-token", auth.token);
+      setUser(auth.user);
+      const basket = await api.basket.get(auth.token);
       setCart(basketToCart(basket));
-      localStorage.removeItem("atelier-cart");
     } catch (error) { setToast(error instanceof Error ? error.message : "Could not load your basket"); }
+  };
+
+  const logout = () => {
+    localStorage.removeItem("atelier-token");
+    setUser(null);
+    setCart([]);
   };
 
   const toggleFavorite = (id: number) => {
@@ -166,7 +176,7 @@ export default function Marketplace() {
   const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   return <main>
-    <Header brands={brands} types={types} cartCount={cartCount} onAccountOpen={() => setAuthOpen(true)} onCartOpen={() => setCartOpen(true)}/>
+    <Header brands={brands} types={types} cartCount={cartCount} user={user} onAccountOpen={() => setAuthOpen(true)} onCartOpen={() => setCartOpen(true)} onLogout={logout}/>
     <HeroView/>
     <ValueStrip/>
     <CatalogView devices={shownDevices} brands={brands} types={types} loading={loading} error={error} query={query} sort={sort} brandId={brandId} typeId={typeId} favorites={favorites} count={count} page={page} onQuery={setQuery} onSort={setSort} onBrand={value => setUrlFilters({ brandId: value })} onType={value => setUrlFilters({ typeId: value })} onClear={clearFilters} onSelect={setSelected} onFavorite={toggleFavorite} onAdd={addToCart} onPage={setPage}/>

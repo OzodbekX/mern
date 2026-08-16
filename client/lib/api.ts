@@ -6,6 +6,8 @@ export type Device = { id:number; name:string; price:number; rating?:number; img
 export type Taxonomy = { id:number; name:string };
 export type DeviceList = { count:number; rows:Device[] };
 export type AuthPayload = { email:string; password:string; role?:string };
+export type User = { id:number; email:string; role:string; createdAt:string; updatedAt:string };
+export type AuthResponse = { token:string; user:User };
 export type DeviceFilters = { page?:number; limit?:number; brandId?:number; typeId?:number };
 export type CreateDevicePayload = { name:string; price:number|string; brandId:number|string; typeId:number|string; img:File; info?:DeviceInfo[] };
 export type BasketDevice = { id:number; basketId:number; deviceId:number; device:Device };
@@ -29,7 +31,7 @@ export const api={
   users:{
     register:(payload:AuthPayload)=>request<{token:string}>("/user/registration",{method:"POST",body:JSON.stringify(payload)}),
     login:(payload:AuthPayload)=>request<{token:string}>("/user/login",{method:"POST",body:JSON.stringify(payload)}),
-    authenticate:(token:string)=>request<{token:string}>("/user/auth",{},token),
+    authenticate:(token:string)=>request<AuthResponse>("/user/auth",{},token),
   },
   types:{
     list:()=>request<Taxonomy[]>("/type"), get:(id:number|string)=>request<Taxonomy>(`/type/${id}`),

@@ -40,8 +40,19 @@ class UserController {
     }
 
     async check(req, res, next) {
-        const token=generateJWT(req.user.id,req.user.email,req.user.role)
-        return res.json({token})
+        try {
+            const user = await User.findByPk(req.user.id, {
+                attributes: { exclude: ['password'] }
+            })
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' })
+            }
+
+            const token = generateJWT(user.id, user.email, user.role)
+            return res.json({ token, user })
+        } catch (error) {
+            return next(ApiError.badRequest(error.message))
+        }
     }
 }
 

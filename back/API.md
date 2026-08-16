@@ -1,6 +1,8 @@
 # API Reference
 
-This service exposes a REST API for users, product types, brands, and devices.
+This service exposes a REST API for users, product types, brands, devices, baskets, saved-card metadata, and fake order payments.
+
+> The order payment endpoints are development-only simulations and must not be used as a real payment processor.
 
 ## Base URL
 
@@ -46,6 +48,14 @@ Tokens expire after 24 hours. Except where noted below, the current routes are p
 | POST | `/basket` | Bearer token | Add a device to the basket |
 | DELETE | `/basket/:deviceId` | Bearer token | Remove a device from the basket |
 | DELETE | `/basket` | Bearer token | Clear the basket |
+| GET | `/card` | Bearer token | List the current user's saved cards |
+| GET | `/card/:id` | Bearer token | Get one saved card |
+| POST | `/card` | Bearer token | Create a saved card |
+| PUT | `/card/:id` | Bearer token | Update a saved card |
+| DELETE | `/card/:id` | Bearer token | Delete a saved card |
+| POST | `/order` | Bearer token | Submit a fake order and card payment |
+| POST | `/order/saved-card` | Bearer token | Purchase using an existing saved card |
+| POST | `/order/verify` | Bearer token | Verify a fake order payment |
 
 ## Users
 
@@ -113,17 +123,24 @@ GET /api/user/auth
 Authorization: Bearer <token>
 ```
 
-Returns a new token containing the same user ID, email, and role.
+Returns a new token and the authenticated user's current database data. The password is excluded.
 
 Success response (`200`):
 
 ```json
 {
-  "token": "<new-jwt>"
+  "token": "<new-jwt>",
+  "user": {
+    "id": 1,
+    "email": "user@example.com",
+    "role": "USER",
+    "createdAt": "2026-08-17T10:00:00.000Z",
+    "updatedAt": "2026-08-17T10:00:00.000Z"
+  }
 }
 ```
 
-Possible error: `401` when the token is absent or invalid.
+Possible errors: `401` when the token is absent or invalid and `404` when its user no longer exists.
 
 ## Types
 
@@ -450,6 +467,205 @@ Success response (`200`):
   "removed": 3
 }
 ```
+
+## Saved Cards
+
+Saved-card endpoints require a valid bearer token and only access cards owned by the authenticated user. For security, this API stores only card display metadata; do not send or store a full card number or CVV.
+
+### List saved cards
+
+```http
+GET /api/card
+Authorization: Bearer <token>
+```
+
+Returns the user's cards with the default card first.
+
+### Get a saved card
+
+```http
+GET /api/card/:id
+Authorization: Bearer <token>
+```
+
+Returns `404` when the card does not exist or belongs to another user.
+
+### Create a saved card
+
+```http
+POST /api/card
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+Request body:
+
+```json
+{
+  "holderName": "Alice Example",
+  "brand": "Visa",
+  "last4": "4242",
+  "expiryMonth": 12,
+  "expiryYear": 2030,
+  "isDefault": true
+}
+```
+
+The first card is automatically made the default. Making another card the default removes the default flag from the user's other cards. Returns the created card with status `201`.
+
+### Update a saved card
+
+```http
+PUT /api/card/:id
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+Send any subset of the create fields. Returns the updated card or `404` when it is not owned by the current user.
+
+### Delete a saved card
+
+```http
+DELETE /api/card/:id
+Authorization: Bearer <token>
+```
+
+Returns `200` after deletion or `404` when the card is not owned by the current user.
+
+## Fake Order Payment
+
+These development-only endpoints simulate a two-step card payment. Each step has an independent 25% chance of returning one of its documented fake payment errors. Full card numbers and passwords are used only to validate the request and are never stored or returned.
+
+### Submit an order
+
+```http
+POST /api/order
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+Request body:
+
+```json
+{
+  "items": [
+    {
+      "deviceId": 1,
+      "quantity": 2,
+      "price": 999
+    }
+  ],
+  "amount": 1998,
+  "card": {
+    "number": "4242424242424242",
+    "expiryMonth": 12,
+    "expiryYear": 2030,
+    "password": "1234"
+  }
+}
+```
+
+Success response (`201`):
+
+```json
+{
+  "success": true,
+  "message": "Card accepted. Verification is required.",
+  "transactionId": "a7af5382-f753-466e-a730-2892a2079847",
+  "status": "PENDING_VERIFICATION",
+  "verificationCode": "123456"
+}
+```
+
+The verification code is returned only because this is a fake development payment API. Possible simulated errors are:
+
+- `400 WRONG_CARD_PASSWORD`
+- `400 INVALID_EXPIRATION`
+
+Invalid or expired expiration data always produces `INVALID_EXPIRATION` independently of the random simulation.
+
+### Purchase with a saved card
+
+This one-step endpoint uses a card previously created through `/api/card`. The card must belong to the authenticated user.
+
+```http
+POST /api/order/saved-card
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+Request body:
+
+```json
+{
+  "items": [
+    {
+      "deviceId": 1,
+      "quantity": 2,
+      "price": 999
+    }
+  ],
+  "amount": 1998,
+  "cardId": 1
+}
+```
+
+Success response (`201`):
+
+```json
+{
+  "success": true,
+  "message": "Purchase completed successfully.",
+  "transactionId": "a7af5382-f753-466e-a730-2892a2079847",
+  "orderId": 1,
+  "status": "PAID",
+  "amount": "1998.00",
+  "card": {
+    "id": 1,
+    "brand": "Visa",
+    "last4": "4242"
+  }
+}
+```
+
+Each otherwise valid request has a 25% chance of returning `402 INSUFFICIENT_FUNDS`. It returns `404 CARD_NOT_FOUND` when the saved card does not exist or belongs to another user, and `400 INVALID_EXPIRATION` when it has expired.
+
+### Verify payment
+
+```http
+POST /api/order/verify
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+Request body:
+
+```json
+{
+  "transactionId": "a7af5382-f753-466e-a730-2892a2079847",
+  "verificationCode": "123456"
+}
+```
+
+Success response (`200`):
+
+```json
+{
+  "success": true,
+  "message": "Payment verified and order accepted.",
+  "transactionId": "a7af5382-f753-466e-a730-2892a2079847",
+  "orderId": 1,
+  "status": "PAID",
+  "amount": "1998.00"
+}
+```
+
+Possible errors include:
+
+- `400 WRONG_VERIFICATION_CODE`
+- `402 INSUFFICIENT_FUNDS`
+- `404 ORDER_NOT_FOUND`
+- `409 ORDER_ALREADY_PROCESSED`
 
 ## Notes about current behavior
 
