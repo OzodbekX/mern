@@ -1,15 +1,33 @@
-# Node.js
+# Dependencies
 node_modules/
-**/node_modules/
-**/yarn.lock
-.npm
-.eslintcache
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
-# Build output
+# Node.js and package-manager caches
+.npm/
+.cache/
+.eslintcache
+*.tsbuildinfo
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+.vercel/
+.turbo/
+
+# Other build output
 build/
 dist/
 .vite/
-.cache/
+
+# Tests and coverage
+coverage/
 
 # Logs
 *.log
@@ -18,14 +36,11 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Test coverage
-coverage/
-
-# Environment variables
+# Environment variables (keep templates in Git)
 .env
-.env.local
-.env.*.local
+.env.*
 !.env.example
+!.env.*.example
 
 # OS files
 .DS_Store
