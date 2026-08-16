@@ -28,7 +28,7 @@ export default function ProductCard({
       <button
         className={`favorite ${isFavorite ? "active" : ""}`}
         onClick={onFavorite}
-        aria-label="Save product"
+        aria-label={t.new}
       >
         <Icon name="heart" size={19} />
       </button>
@@ -37,11 +37,11 @@ export default function ProductCard({
         href={localizedPath(locale, `/products/${product.id}`)}
       >
         <ProductVisual product={product} />
-        {isNew && <span className="tag">New</span>}
+        {isNew && <span className="tag">{t.new}</span>}
       </Link>
       <div className="product-meta">
         <div>
-          <p>{brandName || "Independent maker"}</p>
+          <p>{brandName || t.independentMaker}</p>
           <h3>
             <Link href={localizedPath(locale, `/products/${product.id}`)}>
               {product.name}

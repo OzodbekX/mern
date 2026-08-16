@@ -11,7 +11,7 @@ const languageNames: Record<Locale, string> = {
 };
 
 export default function LanguageSwitcher() {
-  const { locale } = useI18n();
+  const { locale, t } = useI18n();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -49,7 +49,7 @@ export default function LanguageSwitcher() {
         onClick={() => setOpen((value) => !value)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        aria-label="Change language"
+        aria-label={t.changeLanguage}
       >
         <svg
           className="text-[#b95736]"
@@ -84,10 +84,10 @@ export default function LanguageSwitcher() {
       <div
         className={`absolute top-12 right-0 z-50 w-44 origin-top-right rounded-2xl border border-[#d8d2c5] bg-[#fbfaf6] p-2 shadow-[0_18px_55px_rgba(36,36,31,.16)] transition-all duration-200 ${open ? "visible translate-y-0 scale-100 opacity-100" : "invisible -translate-y-2 scale-95 opacity-0"}`}
         role="listbox"
-        aria-label="Languages"
+        aria-label={t.languages}
       >
         <p className="px-3 pt-2 pb-2 text-[8px] font-semibold uppercase tracking-[.2em] text-[#9a958a]">
-          Select language
+          {t.selectLanguage}
         </p>
         {locales.map((item) => {
           const active = item === locale;

@@ -9,6 +9,7 @@ import {
 } from "@/lib/api";
 import type { CartItem } from "./CartDrawer";
 import Icon from "@/components/ui/Icon";
+import { useI18n } from "@/lib/i18n";
 
 type Props = {
   cart: CartItem[];
@@ -24,6 +25,7 @@ const cardBrand = (number: string) =>
       : "Card";
 
 export default function CheckoutModal({ cart, total, close, onPaid }: Props) {
+  const { t } = useI18n();
   const [cards, setCards] = useState<SavedCard[]>([]),
     [mode, setMode] = useState<"saved" | "new">("saved"),
     [loading, setLoading] = useState(true),
@@ -45,7 +47,7 @@ export default function CheckoutModal({ cart, total, close, onPaid }: Props) {
   useEffect(() => {
     if (!token) {
       Promise.resolve().then(() => {
-        setMessage("Please sign in before checkout.");
+        setMessage(t.signInCheckout);
         setLoading(false);
       });
       return;
@@ -54,12 +56,10 @@ export default function CheckoutModal({ cart, total, close, onPaid }: Props) {
       .list(token)
       .then(setCards)
       .catch((error) =>
-        setMessage(
-          error instanceof Error ? error.message : "Could not load cards",
-        ),
+        setMessage(error instanceof Error ? error.message : t.loadCardsError),
       )
       .finally(() => setLoading(false));
-  }, [token]);
+  }, [token, t.loadCardsError, t.signInCheckout]);
 
   const paySaved = async (cardId: number) => {
     if (!token) return;
@@ -71,10 +71,10 @@ export default function CheckoutModal({ cart, total, close, onPaid }: Props) {
         token,
       );
       await onPaid();
-      setMessage("Payment successful. Thank you for your order!");
+      setMessage(t.paymentSuccess);
       setTimeout(close, 1400);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Payment failed");
+      setMessage(error instanceof Error ? error.message : t.paymentFailed);
     } finally {
       setBusy(false);
     }
@@ -86,9 +86,7 @@ export default function CheckoutModal({ cart, total, close, onPaid }: Props) {
       await api.cards.remove(id, token);
       setCards((current) => current.filter((card) => card.id !== id));
     } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "Could not delete card",
-      );
+      setMessage(error instanceof Error ? error.message : t.deleteCardError);
     } finally {
       setBusy(false);
     }
@@ -127,7 +125,7 @@ export default function CheckoutModal({ cart, total, close, onPaid }: Props) {
         isDefault: cards.length === 0,
       });
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Payment failed");
+      setMessage(error instanceof Error ? error.message : t.paymentFailed);
     } finally {
       setBusy(false);
     }
@@ -148,12 +146,10 @@ export default function CheckoutModal({ cart, total, close, onPaid }: Props) {
         setCards((current) => [saved, ...current]);
       }
       await onPaid();
-      setMessage("Payment verified. Your order is complete!");
+      setMessage(t.verificationSuccess);
       setTimeout(close, 1400);
     } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "Verification failed",
-      );
+      setMessage(error instanceof Error ? error.message : t.verificationFailed);
     } finally {
       setBusy(false);
     }
@@ -172,14 +168,12 @@ export default function CheckoutModal({ cart, total, close, onPaid }: Props) {
           <Icon name="close" />
         </button>
         <p className="mb-2 text-[9px] font-semibold uppercase tracking-[.22em] text-[#b95736]">
-          Secure checkout
+          {t.secureCheckout}
         </p>
-        <h2 className="font-serif text-4xl md:text-5xl">
-          Complete your order.
-        </h2>
+        <h2 className="font-serif text-4xl md:text-5xl">{t.completeOrder}</h2>
         <div className="my-6 flex justify-between rounded-2xl bg-[#eee8db] p-4 text-sm">
           <span>
-            {cart.length} {cart.length === 1 ? "item" : "items"}
+            {cart.length} {cart.length === 1 ? t.item : t.items}
           </span>
           <strong>${total.toLocaleString()}</strong>
         </div>
@@ -197,18 +191,18 @@ export default function CheckoutModal({ cart, total, close, onPaid }: Props) {
                 className={`rounded-lg py-2 text-[10px] uppercase tracking-[.12em] ${mode === "saved" ? "bg-white shadow-sm" : ""}`}
                 onClick={() => setMode("saved")}
               >
-                Saved cards
+                {t.savedCards}
               </button>
               <button
                 className={`rounded-lg py-2 text-[10px] uppercase tracking-[.12em] ${mode === "new" ? "bg-white shadow-sm" : ""}`}
                 onClick={() => setMode("new")}
               >
-                New card
+                {t.newCard}
               </button>
             </div>
             {loading ? (
               <p className="py-10 text-center text-sm text-[#716f67]">
-                Loading cards…
+                {t.loadingCards}
               </p>
             ) : mode === "saved" ? (
               <div className="space-y-3">
@@ -226,7 +220,7 @@ export default function CheckoutModal({ cart, total, close, onPaid }: Props) {
                           {card.holderName} ·{" "}
                           {String(card.expiryMonth).padStart(2, "0")}/
                           {card.expiryYear}
-                          {card.isDefault ? " · Default" : ""}
+                          {card.isDefault ? ` · ${t.default}` : ""}
                         </p>
                       </div>
                       <div className="flex gap-2">
@@ -235,26 +229,26 @@ export default function CheckoutModal({ cart, total, close, onPaid }: Props) {
                           className="rounded-xl border border-[#d8d2c5] px-3 py-2 text-[9px] text-[#b95736]"
                           onClick={() => removeCard(card.id)}
                         >
-                          Delete
+                          {t.delete}
                         </button>
                         <button
                           disabled={busy}
                           className="rounded-xl bg-[#24241f] px-4 py-2 text-[9px] uppercase tracking-[.12em] !text-white"
                           onClick={() => paySaved(card.id)}
                         >
-                          Pay
+                          {t.pay}
                         </button>
                       </div>
                     </div>
                   ))
                 ) : (
                   <div className="py-10 text-center">
-                    <p className="font-serif text-xl">No saved cards yet.</p>
+                    <p className="font-serif text-xl">{t.noSavedCards}</p>
                     <button
                       className="mt-3 text-xs text-[#b95736] underline"
                       onClick={() => setMode("new")}
                     >
-                      Add a new card
+                      {t.addNewCard}
                     </button>
                   </div>
                 )}
@@ -275,8 +269,7 @@ export default function CheckoutModal({ cart, total, close, onPaid }: Props) {
           </>
         )}
         <p className="mt-6 text-center text-[9px] leading-4 text-[#8a867d]">
-          Development payment simulation. Full card details and passwords are
-          never stored.
+          {t.paymentDisclaimer}
         </p>
       </div>
     </div>
@@ -294,39 +287,41 @@ function NewCardForm({
   setSave: (v: boolean) => void;
   onSubmit: (e: FormEvent<HTMLFormElement>) => void;
 }) {
+  const { t } = useI18n();
+
   return (
     <form className="grid gap-4 sm:grid-cols-2" onSubmit={onSubmit}>
       <Field
-        label="Cardholder name"
+        label={t.cardholder}
         name="holderName"
         placeholder="Alice Example"
       />
       <div className="sm:col-span-2">
         <Field
-          label="Card number"
+          label={t.cardNumber}
           name="number"
           placeholder="4242 4242 4242 4242"
           inputMode="numeric"
         />
       </div>
       <Field
-        label="Expiry month"
+        label={t.expiryMonth}
         name="expiryMonth"
         placeholder="12"
         inputMode="numeric"
       />
       <Field
-        label="Expiry year"
+        label={t.expiryYear}
         name="expiryYear"
         placeholder="2030"
         inputMode="numeric"
       />
       <div className="sm:col-span-2">
         <Field
-          label="Card password"
+          label={t.cardPassword}
           name="password"
           type="password"
-          placeholder="Payment password"
+          placeholder={t.paymentPassword}
         />
       </div>
       <label className="flex items-center gap-2 text-xs text-[#716f67] sm:col-span-2">
@@ -335,10 +330,10 @@ function NewCardForm({
           checked={save}
           onChange={(e) => setSave(e.target.checked)}
         />{" "}
-        Save card display details for future purchases
+        {t.saveCard}
       </label>
       <button disabled={busy} className="primary full sm:col-span-2">
-        {busy ? "Processing…" : "Continue to verification"}
+        {busy ? t.processing : t.continueVerification}
         <Icon name="arrow" size={18} />
       </button>
     </form>
@@ -376,14 +371,16 @@ function Verification({
   message: string;
   onSubmit: (e: FormEvent<HTMLFormElement>) => void;
 }) {
+  const { t } = useI18n();
+
   return (
     <form onSubmit={onSubmit} className="py-4 text-center">
       <div className="mx-auto mb-5 grid h-14 w-14 place-items-center rounded-full bg-[#e3eadf] text-2xl text-[#56704f]">
         ✓
       </div>
-      <h3 className="font-serif text-2xl">Verify your payment</h3>
+      <h3 className="font-serif text-2xl">{t.verifyPayment}</h3>
       <p className="mt-2 text-xs text-[#716f67]">
-        Enter the six-digit verification code. Development code:{" "}
+        {t.verificationHelp}{" "}
         <b className="text-[#b95736]">{pending.verificationCode}</b>
       </p>
       <input
@@ -395,7 +392,7 @@ function Verification({
         placeholder="000000"
       />
       <button disabled={busy} className="primary mt-5">
-        {busy ? "Verifying…" : "Verify and pay"}
+        {busy ? t.verifying : t.verifyPay}
       </button>
       {message && <p className="mt-4 text-xs text-[#b95736]">{message}</p>}
     </form>

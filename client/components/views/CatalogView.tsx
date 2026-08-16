@@ -1,3 +1,5 @@
+"use client";
+
 import type { Device, Taxonomy } from "@/lib/api";
 import Icon from "@/components/ui/Icon";
 import ProductCard from "@/components/products/ProductCard";
@@ -34,12 +36,11 @@ export default function CatalogView(p: Props) {
     <section className="catalog" id="shop">
       <div className="section-heading">
         <div>
-          <p className="eyebrow">Shop all</p>
-          <h2>Designed to belong.</h2>
+          <p className="eyebrow">{t.shopAll}</p>
+          <h2>{t.designed}</h2>
         </div>
         <p>
-          {p.count} considered {p.count === 1 ? "piece" : "pieces"}, each
-          selected for lasting quality.
+          {p.count} {p.count === 1 ? t.piece : t.pieces}, {t.qualityText}
         </p>
       </div>
       <div className="shop-tools">
@@ -54,7 +55,7 @@ export default function CatalogView(p: Props) {
         </div>
         <div className="selects">
           <select
-            aria-label="Filter by category"
+            aria-label={t.categories}
             value={p.typeId || ""}
             onChange={(e) => p.onType(e.target.value ? +e.target.value : null)}
           >
@@ -66,7 +67,7 @@ export default function CatalogView(p: Props) {
             ))}
           </select>
           <select
-            aria-label="Filter by brand"
+            aria-label={t.brands}
             value={p.brandId || ""}
             onChange={(e) => p.onBrand(e.target.value ? +e.target.value : null)}
           >
@@ -78,22 +79,22 @@ export default function CatalogView(p: Props) {
             ))}
           </select>
           <select
-            aria-label="Sort products"
+            aria-label={t.featured}
             value={p.sort}
             onChange={(e) => p.onSort(e.target.value)}
           >
             <option value="featured">{t.featured}</option>
-            <option value="price-low">Price: low to high</option>
-            <option value="price-high">Price: high to low</option>
-            <option value="rating">Top rated</option>
+            <option value="price-low">{t.priceLow}</option>
+            <option value="price-high">{t.priceHigh}</option>
+            <option value="rating">{t.topRated}</option>
           </select>
         </div>
       </div>
       {(p.brandId || p.typeId || p.query) && (
         <div className="active-filter">
-          <span>Showing a refined selection</span>
+          <span>{t.refinedSelection}</span>
           <button onClick={p.onClear}>
-            Clear filters <Icon name="close" size={14} />
+            {t.clearFilters} <Icon name="close" size={14} />
           </button>
         </div>
       )}
@@ -110,18 +111,18 @@ export default function CatalogView(p: Props) {
       ) : p.error ? (
         <div className="empty">
           <div>↗</div>
-          <h3>The collection is taking a moment</h3>
+          <h3>{t.collectionMoment}</h3>
           <p>{p.error}</p>
           <button className="outline" onClick={() => location.reload()}>
-            Try again
+            {t.tryAgain}
           </button>
         </div>
       ) : p.devices.length === 0 ? (
         <div className="empty">
-          <h3>No pieces found</h3>
-          <p>Try another search or clear the current filters.</p>
+          <h3>{t.noPieces}</h3>
+          <p>{t.noPiecesText}</p>
           <button className="outline" onClick={p.onClear}>
-            View everything
+            {t.viewEverything}
           </button>
         </div>
       ) : (
@@ -143,16 +144,16 @@ export default function CatalogView(p: Props) {
       {p.count > 9 && (
         <div className="pagination">
           <button disabled={p.page === 1} onClick={() => p.onPage(p.page - 1)}>
-            Previous
+            {t.previous}
           </button>
           <span>
-            Page {p.page} of {pages}
+            {t.page} {p.page} {t.of} {pages}
           </span>
           <button
             disabled={p.page >= pages}
             onClick={() => p.onPage(p.page + 1)}
           >
-            Next
+            {t.next}
           </button>
         </div>
       )}

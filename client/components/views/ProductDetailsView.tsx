@@ -20,18 +20,16 @@ export default function ProductDetailsView({ id }: { id: string }) {
       .get(id)
       .then(setProduct)
       .catch((error) =>
-        setError(error instanceof Error ? error.message : "Product not found"),
+        setError(error instanceof Error ? error.message : t.productNotFound),
       )
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, t.productNotFound]);
 
   const addToCart = async () => {
     if (!product) return;
     const token = localStorage.getItem("atelier-token");
     if (!token) {
-      setBasketMessage(
-        "Please sign in from the marketplace before adding this item.",
-      );
+      setBasketMessage(t.signInToAdd);
       return;
     }
     try {
@@ -40,9 +38,7 @@ export default function ProductDetailsView({ id }: { id: string }) {
       setBasketMessage("");
       setTimeout(() => setAdded(false), 2000);
     } catch (error) {
-      setBasketMessage(
-        error instanceof Error ? error.message : "Could not update your basket",
-      );
+      setBasketMessage(error instanceof Error ? error.message : t.basketError);
     }
   };
 
@@ -57,8 +53,8 @@ export default function ProductDetailsView({ id }: { id: string }) {
   if (error || !product)
     return (
       <main className="route-status">
-        <p className="eyebrow">Not found</p>
-        <h1>This object isn’t available.</h1>
+        <p className="eyebrow">{t.notFound}</p>
+        <h1>{t.unavailable}</h1>
         <p>{error}</p>
         <Link className="outline" href={localizedPath(locale, "/")}>
           {t.back}
@@ -85,7 +81,7 @@ export default function ProductDetailsView({ id }: { id: string }) {
           )}
         </div>
         <div className="product-page-copy">
-          <p className="eyebrow">The considered collection</p>
+          <p className="eyebrow">{t.consideredCollection}</p>
           <h1>{product.name}</h1>
           <div className="modal-rating">
             <span>
@@ -94,10 +90,7 @@ export default function ProductDetailsView({ id }: { id: string }) {
             </span>
             <strong>${Number(product.price).toLocaleString()}</strong>
           </div>
-          <p className="modal-description">
-            Purposeful technology with a refined presence, selected to make your
-            everyday rituals feel a little more considered.
-          </p>
+          <p className="modal-description">{t.productDescription}</p>
           {product.info && product.info.length > 0 && (
             <div className="specs">
               {product.info.map((item, index) => (
@@ -117,7 +110,7 @@ export default function ProductDetailsView({ id }: { id: string }) {
               {basketMessage}
             </p>
           )}
-          <small>Complimentary delivery · 30-day returns</small>
+          <small>{t.deliveryReturns}</small>
         </div>
       </div>
     </main>

@@ -18,6 +18,7 @@ import ProductModal from "@/components/modals/ProductModal";
 import CartDrawer, { type CartItem } from "@/components/modals/CartDrawer";
 import AuthModal from "@/components/modals/AuthModal";
 import CheckoutModal from "@/components/modals/CheckoutModal";
+import { useI18n } from "@/lib/i18n";
 
 const parseFilter = (value: string | null) => {
   const parsed = Number(value);
@@ -30,6 +31,7 @@ const basketToCart = (basket: Basket): CartItem[] =>
     .map((item) => ({ ...item.device, quantity: 1 }));
 
 export default function Marketplace() {
+  const { t } = useI18n();
   const searchParams = useSearchParams();
   const brandId = parseFilter(searchParams.get("brandId"));
   const typeId = parseFilter(searchParams.get("typeId"));
@@ -105,12 +107,10 @@ export default function Marketplace() {
       .catch(() => {
         setDevices([]);
         setCount(0);
-        setError(
-          "We couldn’t reach the marketplace server. Check the API URL in your .env file and make sure the server is running.",
-        );
+        setError(t.serverUnavailable);
       })
       .finally(() => setLoading(false));
-  }, [brandId, typeId, page]);
+  }, [brandId, typeId, page, t.serverUnavailable]);
 
   const shownDevices = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -151,7 +151,7 @@ export default function Marketplace() {
   const addToCart = async (device: Device) => {
     const token = localStorage.getItem("atelier-token");
     if (!token) {
-      setToast("Sign in to add items to your basket");
+      setToast(t.signInBasket);
       setAuthOpen(true);
       setTimeout(() => setToast(""), 2400);
       return;
@@ -160,12 +160,10 @@ export default function Marketplace() {
       const basket = await api.basket.add(device.id, token);
       setCart(basketToCart(basket));
     } catch (error) {
-      setToast(
-        error instanceof Error ? error.message : "Could not update your basket",
-      );
+      setToast(error instanceof Error ? error.message : t.basketError);
       return;
     }
-    setToast(`${device.name} added to your bag`);
+    setToast(`${device.name} ${t.addedToBag}`);
     setTimeout(() => setToast(""), 2400);
   };
 
@@ -179,11 +177,7 @@ export default function Marketplace() {
             : await api.basket.add(id, token);
         setCart(basketToCart(basket));
       } catch (error) {
-        setToast(
-          error instanceof Error
-            ? error.message
-            : "Could not update your basket",
-        );
+        setToast(error instanceof Error ? error.message : t.basketError);
       }
       return;
     }
@@ -198,11 +192,7 @@ export default function Marketplace() {
         await api.basket.clear(token);
         setCart([]);
       } catch (error) {
-        setToast(
-          error instanceof Error
-            ? error.message
-            : "Could not clear your basket",
-        );
+        setToast(error instanceof Error ? error.message : t.clearBasketError);
       }
     } else setCart([]);
   };
@@ -215,9 +205,7 @@ export default function Marketplace() {
       const basket = await api.basket.get(auth.token);
       setCart(basketToCart(basket));
     } catch (error) {
-      setToast(
-        error instanceof Error ? error.message : "Could not load your basket",
-      );
+      setToast(error instanceof Error ? error.message : t.loadBasketError);
     }
   };
 

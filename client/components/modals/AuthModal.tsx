@@ -2,6 +2,7 @@
 import { type FormEvent, useState } from "react";
 import { api } from "@/lib/api";
 import Icon from "@/components/ui/Icon";
+import { useI18n } from "@/lib/i18n";
 
 export default function AuthModal({
   close,
@@ -10,6 +11,7 @@ export default function AuthModal({
   close: () => void;
   onAuthenticated?: (token: string) => void | Promise<void>;
 }) {
+  const { t } = useI18n();
   const [mode, setMode] = useState<"login" | "registration">("login"),
     [busy, setBusy] = useState(false),
     [message, setMessage] = useState("");
@@ -29,12 +31,10 @@ export default function AuthModal({
           : await api.users.register(payload);
       localStorage.setItem("atelier-token", result.token);
       await onAuthenticated?.(result.token);
-      setMessage("Welcome to Atelier Market.");
+      setMessage(t.welcome);
       setTimeout(close, 900);
     } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "Something went wrong.",
-      );
+      setMessage(error instanceof Error ? error.message : t.genericError);
     } finally {
       setBusy(false);
     }
@@ -48,12 +48,12 @@ export default function AuthModal({
         <button className="modal-close" onClick={close}>
           <Icon name="close" />
         </button>
-        <p className="eyebrow">Your account</p>
-        <h2>{mode === "login" ? "Welcome back." : "Join the atelier."}</h2>
-        <p>Save favorites and keep your considered finds close.</p>
+        <p className="eyebrow">{t.yourAccount}</p>
+        <h2>{mode === "login" ? t.welcomeBack : t.joinAtelier}</h2>
+        <p>{t.accountText}</p>
         <form onSubmit={submit}>
           <label>
-            Email address
+            {t.emailAddress}
             <input
               name="email"
               type="email"
@@ -62,21 +62,17 @@ export default function AuthModal({
             />
           </label>
           <label>
-            Password
+            {t.password}
             <input
               name="password"
               type="password"
               required
-              placeholder="Enter any password"
+              placeholder={t.passwordPlaceholder}
             />
           </label>
           {message && <div className="form-message">{message}</div>}
           <button className="primary full" disabled={busy}>
-            {busy
-              ? "One moment…"
-              : mode === "login"
-                ? "Sign in"
-                : "Create account"}
+            {busy ? t.oneMoment : mode === "login" ? t.signIn : t.createAccount}
           </button>
         </form>
         <button
@@ -86,9 +82,7 @@ export default function AuthModal({
             setMessage("");
           }}
         >
-          {mode === "login"
-            ? "New here? Create an account"
-            : "Already a member? Sign in"}
+          {mode === "login" ? t.newHere : t.alreadyMember}
         </button>
       </div>
     </div>

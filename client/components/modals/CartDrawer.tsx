@@ -1,6 +1,9 @@
+"use client";
+
 import type { Device } from "@/lib/api";
 import Icon from "@/components/ui/Icon";
 import ProductVisual from "@/components/products/ProductVisual";
+import { useI18n } from "@/lib/i18n";
 
 export type CartItem = Device & { quantity: number };
 export default function CartDrawer({
@@ -18,6 +21,8 @@ export default function CartDrawer({
   clear: () => void | Promise<void>;
   checkout: () => void;
 }) {
+  const { t } = useI18n();
+
   return (
     <div
       className="overlay drawer-overlay"
@@ -26,8 +31,8 @@ export default function CartDrawer({
       <aside className="drawer">
         <div className="drawer-head">
           <div>
-            <p className="eyebrow">Your selection</p>
-            <h2>Shopping bag</h2>
+            <p className="eyebrow">{t.yourSelection}</p>
+            <h2>{t.shoppingBag}</h2>
           </div>
           <button onClick={close}>
             <Icon name="close" />
@@ -36,10 +41,10 @@ export default function CartDrawer({
         {cart.length === 0 ? (
           <div className="cart-empty">
             <Icon name="bag" size={34} />
-            <h3>Your bag is beautifully empty</h3>
-            <p>Explore the collection and find something worth keeping.</p>
+            <h3>{t.emptyBag}</h3>
+            <p>{t.emptyBagText}</p>
             <button className="outline" onClick={close}>
-              Continue shopping
+              {t.continueShopping}
             </button>
           </div>
         ) : (
@@ -53,14 +58,14 @@ export default function CartDrawer({
                     <p>${Number(item.price).toLocaleString()}</p>
                     <div className="quantity">
                       <button
-                        aria-label="Remove from basket"
+                        aria-label={t.removeBasket}
                         onClick={() => update(item.id, -1)}
                       >
                         <Icon name="minus" size={14} />
                       </button>
                       <span>{item.quantity}</span>
                       <button
-                        aria-label="Add one more"
+                        aria-label={t.addOne}
                         onClick={() => update(item.id, 1)}
                       >
                         <Icon name="plus" size={14} />
@@ -75,18 +80,18 @@ export default function CartDrawer({
             </div>
             <div className="cart-foot">
               <div>
-                <span>Subtotal</span>
+                <span>{t.subtotal}</span>
                 <strong>${total.toLocaleString()}</strong>
               </div>
-              <p>Delivery and taxes calculated at checkout.</p>
+              <p>{t.checkoutNote}</p>
               <button
                 className="mb-1 mt-3 w-full py-2 text-[9px] uppercase tracking-[.14em] text-[#716f67] hover:text-[#b95736]"
                 onClick={() => clear()}
               >
-                Clear basket
+                {t.clearBasket}
               </button>
               <button className="primary full" onClick={checkout}>
-                Continue to checkout <Icon name="arrow" size={18} />
+                {t.continueCheckout} <Icon name="arrow" size={18} />
               </button>
             </div>
           </>

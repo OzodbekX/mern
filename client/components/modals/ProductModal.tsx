@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { api, type Device } from "@/lib/api";
 import Icon from "@/components/ui/Icon";
 import ProductVisual from "@/components/products/ProductVisual";
+import { useI18n } from "@/lib/i18n";
 
 export default function ProductModal({
   product,
@@ -15,6 +16,7 @@ export default function ProductModal({
   close: () => void;
   add: () => void;
 }) {
+  const { t } = useI18n();
   const [detail, setDetail] = useState(product);
   useEffect(() => {
     api.devices
@@ -33,7 +35,7 @@ export default function ProductModal({
         </button>
         <ProductVisual product={product} className="modal-image" />
         <div className="modal-copy">
-          <p className="eyebrow">{brand || "Independent maker"}</p>
+          <p className="eyebrow">{brand || t.independentMaker}</p>
           <h2>{product.name}</h2>
           <div className="modal-rating">
             <span>
@@ -42,10 +44,7 @@ export default function ProductModal({
             </span>
             <strong>${Number(product.price).toLocaleString()}</strong>
           </div>
-          <p className="modal-description">
-            Purposeful technology with a refined presence, selected to make your
-            everyday rituals feel a little more considered.
-          </p>
+          <p className="modal-description">{t.productDescription}</p>
           {detail.info && detail.info.length > 0 && (
             <div className="specs">
               {detail.info.map((x, i) => (
@@ -57,9 +56,9 @@ export default function ProductModal({
             </div>
           )}
           <button className="primary full" onClick={add}>
-            Add to bag <Icon name="arrow" size={18} />
+            {t.addToBag} <Icon name="arrow" size={18} />
           </button>
-          <small>Complimentary delivery · 30-day returns</small>
+          <small>{t.deliveryReturns}</small>
         </div>
       </div>
     </div>

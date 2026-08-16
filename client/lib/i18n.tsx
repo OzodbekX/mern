@@ -1,53 +1,47 @@
 "use client";
-import { createContext, useContext } from "react";
+
+import { createContext, useContext, type ReactNode } from "react";
+import en from "@/lib/locales/en.json";
+import ru from "@/lib/locales/ru.json";
+import uz from "@/lib/locales/uz.json";
 
 export const locales = ["en", "ru", "uz"] as const;
+
 export type Locale = (typeof locales)[number];
-export const isLocale = (value: string): value is Locale => locales.includes(value as Locale);
+export type Dictionary = typeof en;
 
-const en = {
-  newArrivals:"New arrivals", brands:"Brands", categories:"Categories", story:"Our story", shopByMaker:"Shop by maker", shopByCategory:"Shop by category", noBrands:"No brands yet", noCategories:"No categories yet", search:"Search the collection", allCategories:"All categories", allMakers:"All makers", featured:"Featured", addToBag:"Add to bag", back:"Back to collection",
-  announcement:"Complimentary delivery on orders over $150", exploreEdit:"Explore the edit", signIn:"Sign in", signOut:"Sign out", userId:"User ID", memberSince:"Member since",
-  heroEyebrow:"The considered collection · 2026", heroTitle:"Objects made for", heroEmphasis:"everyday rituals.", heroText:"A thoughtful marketplace for beautifully designed technology—chosen for how it feels, works, and lasts.", shopCollection:"Shop the collection", form:"FORM", function:"FUNCTION",
-  curated:"Curated with intention", curatedText:"Fewer, better things", delivered:"Delivered with care", deliveredText:"Free over $150", support:"Here when you need us", supportText:"Human support, always",
-  shopAll:"Shop all", designed:"Designed to belong.", piece:"piece", pieces:"pieces", qualityText:"each selected for lasting quality.", priceLow:"Price: low to high", priceHigh:"Price: high to low", topRated:"Top rated", refinedSelection:"Showing a refined selection", clearFilters:"Clear filters", collectionMoment:"The collection is taking a moment", tryAgain:"Try again", noPieces:"No pieces found", noPiecesText:"Try another search or clear the current filters.", viewEverything:"View everything", previous:"Previous", next:"Next", page:"Page", of:"of", new:"New", independentMaker:"Independent maker",
-  viewpoint:"Our point of view", lessBut:"Less, but", meaningful:"meaningful.", storyText:"We believe the objects closest to us should earn their place. Every piece in our collection balances usefulness, beauty, and the quiet pleasure of thoughtful design.", discoverStandards:"Discover our standards",
-  everydayObjects:"Everyday objects, considered differently.", shop:"Shop", allProducts:"All products", makers:"Makers", about:"About", journal:"Journal", contact:"Contact", atelierNotes:"Notes from the atelier", newsletterText:"Occasional stories, objects, and inspiration.", emailPlaceholder:"Your email address", subscribe:"Subscribe",
-  yourSelection:"Your selection", shoppingBag:"Shopping bag", emptyBag:"Your bag is beautifully empty", emptyBagText:"Explore the collection and find something worth keeping.", continueShopping:"Continue shopping", removeBasket:"Remove from basket", addOne:"Add one more", subtotal:"Subtotal", checkoutNote:"Delivery and taxes calculated at checkout.", clearBasket:"Clear basket", continueCheckout:"Continue to checkout",
-  yourAccount:"Your account", welcomeBack:"Welcome back.", joinAtelier:"Join the atelier.", accountText:"Save favorites and keep your considered finds close.", emailAddress:"Email address", password:"Password", passwordPlaceholder:"Enter any password", oneMoment:"One moment…", createAccount:"Create account", newHere:"New here? Create an account", alreadyMember:"Already a member? Sign in", welcome:"Welcome to Atelier Market.", genericError:"Something went wrong.",
-  secureCheckout:"Secure checkout", completeOrder:"Complete your order.", item:"item", items:"items", savedCards:"Saved cards", newCard:"New card", loadingCards:"Loading cards…", default:"Default", delete:"Delete", pay:"Pay", noSavedCards:"No saved cards yet.", addNewCard:"Add a new card", cardholder:"Cardholder name", cardNumber:"Card number", expiryMonth:"Expiry month", expiryYear:"Expiry year", cardPassword:"Card password", paymentPassword:"Payment password", saveCard:"Save card display details for future purchases", processing:"Processing…", continueVerification:"Continue to verification", verifyPayment:"Verify your payment", verificationHelp:"Enter the six-digit verification code. Development code:", verifying:"Verifying…", verifyPay:"Verify and pay", paymentDisclaimer:"Development payment simulation. Full card details and passwords are never stored.", signInCheckout:"Please sign in before checkout.", loadCardsError:"Could not load cards", deleteCardError:"Could not delete card", paymentFailed:"Payment failed", verificationFailed:"Verification failed", paymentSuccess:"Payment successful. Thank you for your order!", verificationSuccess:"Payment verified. Your order is complete!",
-  consideredCollection:"The considered collection", productDescription:"Purposeful technology with a refined presence, selected to make your everyday rituals feel a little more considered.", deliveryReturns:"Complimentary delivery · 30-day returns", notFound:"Not found", unavailable:"This object isn’t available.", productNotFound:"Product not found", signInToAdd:"Please sign in from the marketplace before adding this item.", basketError:"Could not update your basket", added:"Added",
-};
-type Dictionary = typeof en;
-const ru:Dictionary = {...en,
-  newArrivals:"Новинки",brands:"Бренды",categories:"Категории",story:"О нас",shopByMaker:"По производителю",shopByCategory:"По категории",noBrands:"Брендов пока нет",noCategories:"Категорий пока нет",search:"Поиск по коллекции",allCategories:"Все категории",allMakers:"Все бренды",featured:"Рекомендуемые",addToBag:"В корзину",back:"Назад к коллекции",
-  announcement:"Бесплатная доставка для заказов от $150",exploreEdit:"Смотреть подборку",signIn:"Войти",signOut:"Выйти",userId:"ID пользователя",memberSince:"С нами с",
-  heroEyebrow:"Продуманная коллекция · 2026",heroTitle:"Вещи для ваших",heroEmphasis:"ежедневных ритуалов.",heroText:"Продуманный маркетплейс красивой техники — выбранной за ощущения, функциональность и долговечность.",shopCollection:"Смотреть коллекцию",form:"ФОРМА",function:"ФУНКЦИЯ",
-  curated:"Отобрано осознанно",curatedText:"Меньше, но лучше",delivered:"Доставлено с заботой",deliveredText:"Бесплатно от $150",support:"Мы всегда рядом",supportText:"Поддержка от людей",
-  shopAll:"Все товары",designed:"Создано для вашей жизни.",piece:"товар",pieces:"товаров",qualityText:"каждый выбран за долговечное качество.",priceLow:"Цена: по возрастанию",priceHigh:"Цена: по убыванию",topRated:"Лучший рейтинг",refinedSelection:"Показана выбранная подборка",clearFilters:"Сбросить фильтры",collectionMoment:"Коллекция временно недоступна",tryAgain:"Повторить",noPieces:"Ничего не найдено",noPiecesText:"Попробуйте другой запрос или сбросьте фильтры.",viewEverything:"Показать всё",previous:"Назад",next:"Далее",page:"Страница",of:"из",new:"Новинка",independentMaker:"Независимый производитель",
-  viewpoint:"Наша точка зрения",lessBut:"Меньше, но",meaningful:"значимее.",storyText:"Мы считаем, что близкие нам вещи должны заслуживать своё место. Каждый предмет сочетает пользу, красоту и удовольствие от продуманного дизайна.",discoverStandards:"Узнать наши стандарты",
-  everydayObjects:"Повседневные вещи с новым взглядом.",shop:"Магазин",allProducts:"Все товары",makers:"Производители",about:"О нас",journal:"Журнал",contact:"Контакты",atelierNotes:"Записки из ателье",newsletterText:"Редкие истории, предметы и вдохновение.",emailPlaceholder:"Ваш email",subscribe:"Подписаться",
-  yourSelection:"Ваш выбор",shoppingBag:"Корзина",emptyBag:"Ваша корзина пока пуста",emptyBagText:"Откройте коллекцию и найдите то, что стоит сохранить.",continueShopping:"Продолжить покупки",removeBasket:"Удалить из корзины",addOne:"Добавить ещё",subtotal:"Итого",checkoutNote:"Доставка и налоги рассчитываются при оформлении.",clearBasket:"Очистить корзину",continueCheckout:"Перейти к оплате",
-  yourAccount:"Ваш аккаунт",welcomeBack:"С возвращением.",joinAtelier:"Присоединяйтесь.",accountText:"Сохраняйте избранное и выбранные товары.",emailAddress:"Email",password:"Пароль",passwordPlaceholder:"Введите любой пароль",oneMoment:"Подождите…",createAccount:"Создать аккаунт",newHere:"Впервые здесь? Создать аккаунт",alreadyMember:"Уже есть аккаунт? Войти",welcome:"Добро пожаловать в Atelier Market.",genericError:"Что-то пошло не так.",
-  secureCheckout:"Безопасная оплата",completeOrder:"Завершите заказ.",item:"товар",items:"товаров",savedCards:"Сохранённые карты",newCard:"Новая карта",loadingCards:"Загрузка карт…",default:"Основная",delete:"Удалить",pay:"Оплатить",noSavedCards:"Сохранённых карт пока нет.",addNewCard:"Добавить карту",cardholder:"Имя владельца",cardNumber:"Номер карты",expiryMonth:"Месяц",expiryYear:"Год",cardPassword:"Пароль карты",paymentPassword:"Платёжный пароль",saveCard:"Сохранить данные карты для будущих покупок",processing:"Обработка…",continueVerification:"Перейти к подтверждению",verifyPayment:"Подтвердите платёж",verificationHelp:"Введите шестизначный код. Тестовый код:",verifying:"Проверка…",verifyPay:"Подтвердить и оплатить",paymentDisclaimer:"Тестовая оплата. Полный номер карты и пароль не сохраняются.",signInCheckout:"Войдите для оформления заказа.",loadCardsError:"Не удалось загрузить карты",deleteCardError:"Не удалось удалить карту",paymentFailed:"Ошибка оплаты",verificationFailed:"Ошибка подтверждения",paymentSuccess:"Оплата успешна. Спасибо за заказ!",verificationSuccess:"Платёж подтверждён. Заказ оформлен!",
-  consideredCollection:"Продуманная коллекция",productDescription:"Функциональная техника с изысканным характером, выбранная для более приятных ежедневных ритуалов.",deliveryReturns:"Бесплатная доставка · Возврат 30 дней",notFound:"Не найдено",unavailable:"Этот товар недоступен.",productNotFound:"Товар не найден",signInToAdd:"Войдите в магазине, чтобы добавить товар.",basketError:"Не удалось обновить корзину",added:"Добавлено",
-};
-const uz:Dictionary = {...en,
-  newArrivals:"Yangi mahsulotlar",brands:"Brendlar",categories:"Toifalar",story:"Biz haqimizda",shopByMaker:"Brend bo‘yicha",shopByCategory:"Toifa bo‘yicha",noBrands:"Brendlar hali yo‘q",noCategories:"Toifalar hali yo‘q",search:"To‘plamdan qidiring",allCategories:"Barcha toifalar",allMakers:"Barcha brendlar",featured:"Tavsiya etilgan",addToBag:"Savatga qo‘shish",back:"To‘plamga qaytish",
-  announcement:"$150 dan ortiq buyurtmalarga bepul yetkazish",exploreEdit:"Tanlovni ko‘rish",signIn:"Kirish",signOut:"Chiqish",userId:"Foydalanuvchi ID",memberSince:"A’zo bo‘lgan sana",
-  heroEyebrow:"Puxta tanlangan to‘plam · 2026",heroTitle:"Kundalik hayot uchun",heroEmphasis:"mazmunli buyumlar.",heroText:"Chiroyli texnologiyalar uchun puxta o‘ylangan marketpleys — his, ishlash va chidamlilik asosida tanlangan.",shopCollection:"To‘plamni ko‘rish",form:"SHAKL",function:"VAZIFA",
-  curated:"E’tibor bilan tanlangan",curatedText:"Kamroq, ammo yaxshiroq",delivered:"G‘amxo‘rlik bilan yetkaziladi",deliveredText:"$150 dan bepul",support:"Doim yoningizdamiz",supportText:"Haqiqiy insoniy yordam",
-  shopAll:"Barcha mahsulotlar",designed:"Hayotingizga mos yaratilgan.",piece:"mahsulot",pieces:"mahsulot",qualityText:"har biri uzoq xizmat qilishi uchun tanlangan.",priceLow:"Narx: arzondan qimmatga",priceHigh:"Narx: qimmatdan arzonga",topRated:"Yuqori baholangan",refinedSelection:"Tanlangan natijalar ko‘rsatilmoqda",clearFilters:"Filtrlarni tozalash",collectionMoment:"To‘plam vaqtincha ochilmayapti",tryAgain:"Qayta urinish",noPieces:"Mahsulot topilmadi",noPiecesText:"Boshqa so‘rov kiriting yoki filtrlarni tozalang.",viewEverything:"Hammasini ko‘rish",previous:"Oldingi",next:"Keyingi",page:"Sahifa",of:"/",new:"Yangi",independentMaker:"Mustaqil ishlab chiqaruvchi",
-  viewpoint:"Bizning qarashimiz",lessBut:"Kamroq, ammo",meaningful:"mazmunliroq.",storyText:"Bizga eng yaqin buyumlar o‘z o‘rniga loyiq bo‘lishi kerak deb hisoblaymiz. Har bir mahsulot foyda, go‘zallik va puxta dizayn zavqini birlashtiradi.",discoverStandards:"Mezonlarimizni bilish",
-  everydayObjects:"Kundalik buyumlarga yangicha qarash.",shop:"Do‘kon",allProducts:"Barcha mahsulotlar",makers:"Ishlab chiqaruvchilar",about:"Biz haqimizda",journal:"Jurnal",contact:"Aloqa",atelierNotes:"Atelyedan xatlar",newsletterText:"Ba’zan hikoyalar, buyumlar va ilhom.",emailPlaceholder:"Email manzilingiz",subscribe:"Obuna bo‘lish",
-  yourSelection:"Sizning tanlovingiz",shoppingBag:"Savat",emptyBag:"Savatingiz hozircha bo‘sh",emptyBagText:"To‘plamni ko‘rib, saqlashga arzigulik buyumni toping.",continueShopping:"Xaridni davom ettirish",removeBasket:"Savatdan olib tashlash",addOne:"Yana qo‘shish",subtotal:"Jami",checkoutNote:"Yetkazish va soliqlar to‘lovda hisoblanadi.",clearBasket:"Savatni tozalash",continueCheckout:"To‘lovga o‘tish",
-  yourAccount:"Akkauntingiz",welcomeBack:"Qaytganingiz bilan.",joinAtelier:"Bizga qo‘shiling.",accountText:"Sevimlilarni va tanlangan mahsulotlarni saqlang.",emailAddress:"Email",password:"Parol",passwordPlaceholder:"Istalgan parolni kiriting",oneMoment:"Bir oz kuting…",createAccount:"Akkaunt yaratish",newHere:"Yangimisiz? Akkaunt yarating",alreadyMember:"Akkauntingiz bormi? Kiring",welcome:"Atelier Market’ga xush kelibsiz.",genericError:"Nimadir xato ketdi.",
-  secureCheckout:"Xavfsiz to‘lov",completeOrder:"Buyurtmani yakunlang.",item:"mahsulot",items:"mahsulot",savedCards:"Saqlangan kartalar",newCard:"Yangi karta",loadingCards:"Kartalar yuklanmoqda…",default:"Asosiy",delete:"O‘chirish",pay:"To‘lash",noSavedCards:"Saqlangan kartalar yo‘q.",addNewCard:"Yangi karta qo‘shish",cardholder:"Karta egasi",cardNumber:"Karta raqami",expiryMonth:"Amal qilish oyi",expiryYear:"Amal qilish yili",cardPassword:"Karta paroli",paymentPassword:"To‘lov paroli",saveCard:"Keyingi xaridlar uchun karta ma’lumotlarini saqlash",processing:"Qayta ishlanmoqda…",continueVerification:"Tasdiqlashga o‘tish",verifyPayment:"To‘lovni tasdiqlang",verificationHelp:"Olti xonali kodni kiriting. Test kodi:",verifying:"Tekshirilmoqda…",verifyPay:"Tasdiqlash va to‘lash",paymentDisclaimer:"Test to‘lovi. To‘liq karta raqami va parol saqlanmaydi.",signInCheckout:"To‘lov uchun tizimga kiring.",loadCardsError:"Kartalarni yuklab bo‘lmadi",deleteCardError:"Kartani o‘chirib bo‘lmadi",paymentFailed:"To‘lov amalga oshmadi",verificationFailed:"Tasdiqlash amalga oshmadi",paymentSuccess:"To‘lov muvaffaqiyatli. Rahmat!",verificationSuccess:"To‘lov tasdiqlandi. Buyurtma tayyor!",
-  consideredCollection:"Puxta tanlangan to‘plam",productDescription:"Kundalik odatlaringizni yanada yoqimli qiladigan, nafis ko‘rinishdagi foydali texnologiya.",deliveryReturns:"Bepul yetkazish · 30 kunlik qaytarish",notFound:"Topilmadi",unavailable:"Bu mahsulot mavjud emas.",productNotFound:"Mahsulot topilmadi",signInToAdd:"Mahsulot qo‘shish uchun do‘konda tizimga kiring.",basketError:"Savatni yangilab bo‘lmadi",added:"Qo‘shildi",
-};
+export const isLocale = (value: string): value is Locale =>
+  locales.includes(value as Locale);
 
-const dictionaries:Record<Locale,Dictionary>={en,ru,uz};
-const I18nContext=createContext<{locale:Locale;t:Dictionary}>({locale:"en",t:en});
-export function I18nProvider({locale,children}:{locale:Locale;children:React.ReactNode}){return <I18nContext.Provider value={{locale,t:dictionaries[locale]}}>{children}</I18nContext.Provider>}
-export function useI18n(){return useContext(I18nContext)}
-export function localizedPath(locale:Locale,path:string){return `/${locale}${path==="/"?"":path}`}
+const dictionaries = {
+  en,
+  ru,
+  uz,
+} satisfies Record<Locale, Dictionary>;
+
+const I18nContext = createContext<{ locale: Locale; t: Dictionary }>({
+  locale: "en",
+  t: en,
+});
+
+export function I18nProvider({
+  locale,
+  children,
+}: {
+  locale: Locale;
+  children: ReactNode;
+}) {
+  return (
+    <I18nContext.Provider value={{ locale, t: dictionaries[locale] }}>
+      {children}
+    </I18nContext.Provider>
+  );
+}
+
+export function useI18n() {
+  return useContext(I18nContext);
+}
+
+export function localizedPath(locale: Locale, path: string) {
+  return `/${locale}${path === "/" ? "" : path}`;
+}

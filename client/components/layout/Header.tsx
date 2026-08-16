@@ -66,7 +66,7 @@ export default function Header({
       <div className="flex h-8 items-center justify-center gap-5 bg-[#24241f] text-[10px] uppercase tracking-[.09em] text-[#f8f3e9]">
         {t.announcement}{" "}
         <span className="hidden text-[#d8c8ad] sm:inline">
-          Explore the edit →
+          {t.exploreEdit} →
         </span>
       </div>
       <header className="sticky top-0 z-20 flex h-[88px] items-center justify-between border-b border-[#d8d2c5] bg-[#fbfaf6]/95 px-[5.5vw] backdrop-blur-xl">
@@ -105,7 +105,7 @@ export default function Header({
           <LanguageSwitcher />
           <button
             className="p-1"
-            aria-label="Search"
+            aria-label={t.search}
             onClick={() => document.getElementById("search")?.focus()}
           >
             <HeaderIcon name="search" />
@@ -123,7 +123,7 @@ export default function Header({
           )}
           <button
             className="flex items-center gap-1 p-1"
-            aria-label="Shopping bag"
+            aria-label={t.shoppingBag}
             onClick={onCartOpen}
           >
             <HeaderIcon name="bag" />
