@@ -2,7 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { api, type Basket, type Device, type Taxonomy, type User } from "@/lib/api";
+import {
+  api,
+  type Basket,
+  type Device,
+  type Taxonomy,
+  type User,
+} from "@/lib/api";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { HeroView, ValueStrip } from "@/components/views/HeroView";
@@ -19,7 +25,9 @@ const parseFilter = (value: string | null) => {
 };
 
 const basketToCart = (basket: Basket): CartItem[] =>
-  (basket.basket_devices || []).filter(item => item.device).map(item => ({ ...item.device, quantity: 1 }));
+  (basket.basket_devices || [])
+    .filter((item) => item.device)
+    .map((item) => ({ ...item.device, quantity: 1 }));
 
 export default function Marketplace() {
   const searchParams = useSearchParams();
@@ -49,41 +57,67 @@ export default function Marketplace() {
       try {
         const token = localStorage.getItem("atelier-token");
         if (token) {
-          api.users.authenticate(token).then(result => {
-            localStorage.setItem("atelier-token", result.token);
-            setUser(result.user);
-            return api.basket.get(result.token);
-          }).then(basket => setCart(basketToCart(basket))).catch(() => {
-            localStorage.removeItem("atelier-token");
-            setUser(null);
-          });
+          api.users
+            .authenticate(token)
+            .then((result) => {
+              localStorage.setItem("atelier-token", result.token);
+              setUser(result.user);
+              return api.basket.get(result.token);
+            })
+            .then((basket) => setCart(basketToCart(basket)))
+            .catch(() => {
+              localStorage.removeItem("atelier-token");
+              setUser(null);
+            });
         } else {
           setCart([]);
           localStorage.removeItem("atelier-cart");
         }
-        setFavorites(JSON.parse(localStorage.getItem("atelier-favorites") || "[]"));
+        setFavorites(
+          JSON.parse(localStorage.getItem("atelier-favorites") || "[]"),
+        );
       } catch {}
     });
     Promise.all([api.brands.list(), api.types.list()])
-      .then(([brandData, typeData]) => { setBrands(brandData); setTypes(typeData); })
+      .then(([brandData, typeData]) => {
+        setBrands(brandData);
+        setTypes(typeData);
+      })
       .catch(() => {});
   }, []);
 
   useEffect(() => {
-    queueMicrotask(() => { setLoading(true); setError(""); });
-    api.devices.list({ page, limit: 9, brandId: brandId || undefined, typeId: typeId || undefined })
-      .then(data => { setDevices(data.rows || []); setCount(data.count || 0); })
+    queueMicrotask(() => {
+      setLoading(true);
+      setError("");
+    });
+    api.devices
+      .list({
+        page,
+        limit: 9,
+        brandId: brandId || undefined,
+        typeId: typeId || undefined,
+      })
+      .then((data) => {
+        setDevices(data.rows || []);
+        setCount(data.count || 0);
+      })
       .catch(() => {
         setDevices([]);
         setCount(0);
-        setError("We couldn’t reach the marketplace server. Check the API URL in your .env file and make sure the server is running.");
+        setError(
+          "We couldn’t reach the marketplace server. Check the API URL in your .env file and make sure the server is running.",
+        );
       })
       .finally(() => setLoading(false));
   }, [brandId, typeId, page]);
 
   const shownDevices = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
-    const matches = devices.filter(device => !normalizedQuery || device.name.toLowerCase().includes(normalizedQuery));
+    const matches = devices.filter(
+      (device) =>
+        !normalizedQuery || device.name.toLowerCase().includes(normalizedQuery),
+    );
     return [...matches].sort((a, b) => {
       if (sort === "price-low") return a.price - b.price;
       if (sort === "price-high") return b.price - a.price;
@@ -92,7 +126,10 @@ export default function Marketplace() {
     });
   }, [devices, query, sort]);
 
-  const setUrlFilters = (next: { brandId?: number | null; typeId?: number | null }) => {
+  const setUrlFilters = (next: {
+    brandId?: number | null;
+    typeId?: number | null;
+  }) => {
     const params = new URLSearchParams(searchParams.toString());
     if ("brandId" in next) {
       if (next.brandId) params.set("brandId", String(next.brandId));
@@ -103,7 +140,11 @@ export default function Marketplace() {
       else params.delete("typeId");
     }
     const nextQuery = params.toString();
-    window.history.pushState(null, "", nextQuery ? `?${nextQuery}` : window.location.pathname);
+    window.history.pushState(
+      null,
+      "",
+      nextQuery ? `?${nextQuery}` : window.location.pathname,
+    );
     setPage(1);
   };
 
@@ -119,7 +160,9 @@ export default function Marketplace() {
       const basket = await api.basket.add(device.id, token);
       setCart(basketToCart(basket));
     } catch (error) {
-      setToast(error instanceof Error ? error.message : "Could not update your basket");
+      setToast(
+        error instanceof Error ? error.message : "Could not update your basket",
+      );
       return;
     }
     setToast(`${device.name} added to your bag`);
@@ -130,9 +173,18 @@ export default function Marketplace() {
     const token = localStorage.getItem("atelier-token");
     if (token) {
       try {
-        const basket = delta < 0 ? await api.basket.remove(id, token) : await api.basket.add(id, token);
+        const basket =
+          delta < 0
+            ? await api.basket.remove(id, token)
+            : await api.basket.add(id, token);
         setCart(basketToCart(basket));
-      } catch (error) { setToast(error instanceof Error ? error.message : "Could not update your basket"); }
+      } catch (error) {
+        setToast(
+          error instanceof Error
+            ? error.message
+            : "Could not update your basket",
+        );
+      }
       return;
     }
     setCart([]);
@@ -142,8 +194,16 @@ export default function Marketplace() {
   const clearCart = async () => {
     const token = localStorage.getItem("atelier-token");
     if (token) {
-      try { await api.basket.clear(token); setCart([]); }
-      catch (error) { setToast(error instanceof Error ? error.message : "Could not clear your basket"); }
+      try {
+        await api.basket.clear(token);
+        setCart([]);
+      } catch (error) {
+        setToast(
+          error instanceof Error
+            ? error.message
+            : "Could not clear your basket",
+        );
+      }
     } else setCart([]);
   };
 
@@ -154,7 +214,11 @@ export default function Marketplace() {
       setUser(auth.user);
       const basket = await api.basket.get(auth.token);
       setCart(basketToCart(basket));
-    } catch (error) { setToast(error instanceof Error ? error.message : "Could not load your basket"); }
+    } catch (error) {
+      setToast(
+        error instanceof Error ? error.message : "Could not load your basket",
+      );
+    }
   };
 
   const logout = () => {
@@ -164,7 +228,9 @@ export default function Marketplace() {
   };
 
   const toggleFavorite = (id: number) => {
-    const next = favorites.includes(id) ? favorites.filter(item => item !== id) : [...favorites, id];
+    const next = favorites.includes(id)
+      ? favorites.filter((item) => item !== id)
+      : [...favorites, id];
     setFavorites(next);
     localStorage.setItem("atelier-favorites", JSON.stringify(next));
   };
@@ -175,20 +241,89 @@ export default function Marketplace() {
   };
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-  const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const cartTotal = cart.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
 
-  return <main>
-    <Header brands={brands} types={types} cartCount={cartCount} user={user} onAccountOpen={() => setAuthOpen(true)} onCartOpen={() => setCartOpen(true)} onLogout={logout}/>
-    <HeroView/>
-    <ValueStrip/>
-    <CatalogView devices={shownDevices} brands={brands} types={types} loading={loading} error={error} query={query} sort={sort} brandId={brandId} typeId={typeId} favorites={favorites} count={count} page={page} onQuery={setQuery} onSort={setSort} onBrand={value => setUrlFilters({ brandId: value })} onType={value => setUrlFilters({ typeId: value })} onClear={clearFilters} onSelect={setSelected} onFavorite={toggleFavorite} onAdd={addToCart} onPage={setPage}/>
-    <StoryView/>
-    <Footer/>
+  return (
+    <main>
+      <Header
+        brands={brands}
+        types={types}
+        cartCount={cartCount}
+        user={user}
+        onAccountOpen={() => setAuthOpen(true)}
+        onCartOpen={() => setCartOpen(true)}
+        onLogout={logout}
+      />
+      <HeroView />
+      <ValueStrip />
+      <CatalogView
+        devices={shownDevices}
+        brands={brands}
+        types={types}
+        loading={loading}
+        error={error}
+        query={query}
+        sort={sort}
+        brandId={brandId}
+        typeId={typeId}
+        favorites={favorites}
+        count={count}
+        page={page}
+        onQuery={setQuery}
+        onSort={setSort}
+        onBrand={(value) => setUrlFilters({ brandId: value })}
+        onType={(value) => setUrlFilters({ typeId: value })}
+        onClear={clearFilters}
+        onSelect={setSelected}
+        onFavorite={toggleFavorite}
+        onAdd={addToCart}
+        onPage={setPage}
+      />
+      <StoryView />
+      <Footer />
 
-    {toast && <div className="toast">✓ {toast}</div>}
-    {selected && <ProductModal product={selected} brand={brands.find(item => item.id === selected.brandId)?.name} close={() => setSelected(null)} add={() => { addToCart(selected); setSelected(null); }}/>} 
-    {cartOpen && <CartDrawer cart={cart} total={cartTotal} close={() => setCartOpen(false)} update={updateCart} clear={clearCart} checkout={() => { setCartOpen(false); setCheckoutOpen(true); }}/>} 
-    {authOpen && <AuthModal close={() => setAuthOpen(false)} onAuthenticated={loadAuthenticatedBasket}/>} 
-    {checkoutOpen && <CheckoutModal cart={cart} total={cartTotal} close={() => setCheckoutOpen(false)} onPaid={clearCart}/>} 
-  </main>;
+      {toast && <div className="toast">✓ {toast}</div>}
+      {selected && (
+        <ProductModal
+          product={selected}
+          brand={brands.find((item) => item.id === selected.brandId)?.name}
+          close={() => setSelected(null)}
+          add={() => {
+            addToCart(selected);
+            setSelected(null);
+          }}
+        />
+      )}
+      {cartOpen && (
+        <CartDrawer
+          cart={cart}
+          total={cartTotal}
+          close={() => setCartOpen(false)}
+          update={updateCart}
+          clear={clearCart}
+          checkout={() => {
+            setCartOpen(false);
+            setCheckoutOpen(true);
+          }}
+        />
+      )}
+      {authOpen && (
+        <AuthModal
+          close={() => setAuthOpen(false)}
+          onAuthenticated={loadAuthenticatedBasket}
+        />
+      )}
+      {checkoutOpen && (
+        <CheckoutModal
+          cart={cart}
+          total={cartTotal}
+          close={() => setCheckoutOpen(false)}
+          onPaid={clearCart}
+        />
+      )}
+    </main>
+  );
 }

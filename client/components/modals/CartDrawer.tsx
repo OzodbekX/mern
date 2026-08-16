@@ -2,7 +2,96 @@ import type { Device } from "@/lib/api";
 import Icon from "@/components/ui/Icon";
 import ProductVisual from "@/components/products/ProductVisual";
 
-export type CartItem=Device&{quantity:number};
-export default function CartDrawer({cart,total,close,update,clear,checkout}:{cart:CartItem[];total:number;close:()=>void;update:(id:number,delta:number)=>void|Promise<void>;clear:()=>void|Promise<void>;checkout:()=>void}){
- return <div className="overlay drawer-overlay" onMouseDown={e=>e.target===e.currentTarget&&close()}><aside className="drawer"><div className="drawer-head"><div><p className="eyebrow">Your selection</p><h2>Shopping bag</h2></div><button onClick={close}><Icon name="close"/></button></div>{cart.length===0?<div className="cart-empty"><Icon name="bag" size={34}/><h3>Your bag is beautifully empty</h3><p>Explore the collection and find something worth keeping.</p><button className="outline" onClick={close}>Continue shopping</button></div>:<><div className="cart-list">{cart.map(item=><div className="cart-item" key={item.id}><ProductVisual product={item}/><div><h3>{item.name}</h3><p>${Number(item.price).toLocaleString()}</p><div className="quantity"><button aria-label="Remove from basket" onClick={()=>update(item.id,-1)}><Icon name="minus" size={14}/></button><span>{item.quantity}</span><button aria-label="Add one more" onClick={()=>update(item.id,1)}><Icon name="plus" size={14}/></button></div></div><strong>${(item.price*item.quantity).toLocaleString()}</strong></div>)}</div><div className="cart-foot"><div><span>Subtotal</span><strong>${total.toLocaleString()}</strong></div><p>Delivery and taxes calculated at checkout.</p><button className="mb-1 mt-3 w-full py-2 text-[9px] uppercase tracking-[.14em] text-[#716f67] hover:text-[#b95736]" onClick={()=>clear()}>Clear basket</button><button className="primary full" onClick={checkout}>Continue to checkout <Icon name="arrow" size={18}/></button></div></>}</aside></div>;
+export type CartItem = Device & { quantity: number };
+export default function CartDrawer({
+  cart,
+  total,
+  close,
+  update,
+  clear,
+  checkout,
+}: {
+  cart: CartItem[];
+  total: number;
+  close: () => void;
+  update: (id: number, delta: number) => void | Promise<void>;
+  clear: () => void | Promise<void>;
+  checkout: () => void;
+}) {
+  return (
+    <div
+      className="overlay drawer-overlay"
+      onMouseDown={(e) => e.target === e.currentTarget && close()}
+    >
+      <aside className="drawer">
+        <div className="drawer-head">
+          <div>
+            <p className="eyebrow">Your selection</p>
+            <h2>Shopping bag</h2>
+          </div>
+          <button onClick={close}>
+            <Icon name="close" />
+          </button>
+        </div>
+        {cart.length === 0 ? (
+          <div className="cart-empty">
+            <Icon name="bag" size={34} />
+            <h3>Your bag is beautifully empty</h3>
+            <p>Explore the collection and find something worth keeping.</p>
+            <button className="outline" onClick={close}>
+              Continue shopping
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="cart-list">
+              {cart.map((item) => (
+                <div className="cart-item" key={item.id}>
+                  <ProductVisual product={item} />
+                  <div>
+                    <h3>{item.name}</h3>
+                    <p>${Number(item.price).toLocaleString()}</p>
+                    <div className="quantity">
+                      <button
+                        aria-label="Remove from basket"
+                        onClick={() => update(item.id, -1)}
+                      >
+                        <Icon name="minus" size={14} />
+                      </button>
+                      <span>{item.quantity}</span>
+                      <button
+                        aria-label="Add one more"
+                        onClick={() => update(item.id, 1)}
+                      >
+                        <Icon name="plus" size={14} />
+                      </button>
+                    </div>
+                  </div>
+                  <strong>
+                    ${(item.price * item.quantity).toLocaleString()}
+                  </strong>
+                </div>
+              ))}
+            </div>
+            <div className="cart-foot">
+              <div>
+                <span>Subtotal</span>
+                <strong>${total.toLocaleString()}</strong>
+              </div>
+              <p>Delivery and taxes calculated at checkout.</p>
+              <button
+                className="mb-1 mt-3 w-full py-2 text-[9px] uppercase tracking-[.14em] text-[#716f67] hover:text-[#b95736]"
+                onClick={() => clear()}
+              >
+                Clear basket
+              </button>
+              <button className="primary full" onClick={checkout}>
+                Continue to checkout <Icon name="arrow" size={18} />
+              </button>
+            </div>
+          </>
+        )}
+      </aside>
+    </div>
+  );
 }

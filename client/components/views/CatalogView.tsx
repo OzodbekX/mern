@@ -3,12 +3,159 @@ import Icon from "@/components/ui/Icon";
 import ProductCard from "@/components/products/ProductCard";
 import { useI18n } from "@/lib/i18n";
 
-type Props={devices:Device[];brands:Taxonomy[];types:Taxonomy[];loading:boolean;error:string;query:string;sort:string;brandId:number|null;typeId:number|null;favorites:number[];count:number;page:number;onQuery:(v:string)=>void;onSort:(v:string)=>void;onBrand:(v:number|null)=>void;onType:(v:number|null)=>void;onClear:()=>void;onSelect:(v:Device)=>void;onFavorite:(id:number)=>void;onAdd:(v:Device)=>void;onPage:(v:number)=>void};
+type Props = {
+  devices: Device[];
+  brands: Taxonomy[];
+  types: Taxonomy[];
+  loading: boolean;
+  error: string;
+  query: string;
+  sort: string;
+  brandId: number | null;
+  typeId: number | null;
+  favorites: number[];
+  count: number;
+  page: number;
+  onQuery: (v: string) => void;
+  onSort: (v: string) => void;
+  onBrand: (v: number | null) => void;
+  onType: (v: number | null) => void;
+  onClear: () => void;
+  onSelect: (v: Device) => void;
+  onFavorite: (id: number) => void;
+  onAdd: (v: Device) => void;
+  onPage: (v: number) => void;
+};
 
-export default function CatalogView(p:Props){const pages=Math.ceil(p.count/9);const{t}=useI18n();return <section className="catalog" id="shop">
-  <div className="section-heading"><div><p className="eyebrow">Shop all</p><h2>Designed to belong.</h2></div><p>{p.count} considered {p.count===1?"piece":"pieces"}, each selected for lasting quality.</p></div>
-  <div className="shop-tools"><div className="search-box"><Icon name="search" size={19}/><input id="search" value={p.query} onChange={e=>p.onQuery(e.target.value)} placeholder={t.search}/></div><div className="selects"><select aria-label="Filter by category" value={p.typeId||""} onChange={e=>p.onType(e.target.value?+e.target.value:null)}><option value="">{t.allCategories}</option>{p.types.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select><select aria-label="Filter by brand" value={p.brandId||""} onChange={e=>p.onBrand(e.target.value?+e.target.value:null)}><option value="">{t.allMakers}</option>{p.brands.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select><select aria-label="Sort products" value={p.sort} onChange={e=>p.onSort(e.target.value)}><option value="featured">{t.featured}</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option><option value="rating">Top rated</option></select></div></div>
-  {(p.brandId||p.typeId||p.query)&&<div className="active-filter"><span>Showing a refined selection</span><button onClick={p.onClear}>Clear filters <Icon name="close" size={14}/></button></div>}
-  {p.loading?<div className="product-grid">{Array.from({length:6}).map((_,i)=><div className="skeleton" key={i}><div/><span/><small/></div>)}</div>:p.error?<div className="empty"><div>↗</div><h3>The collection is taking a moment</h3><p>{p.error}</p><button className="outline" onClick={()=>location.reload()}>Try again</button></div>:p.devices.length===0?<div className="empty"><h3>No pieces found</h3><p>Try another search or clear the current filters.</p><button className="outline" onClick={p.onClear}>View everything</button></div>:<div className="product-grid">{p.devices.map((product,index)=><ProductCard key={product.id} product={product} brandName={p.brands.find(b=>b.id===product.brandId)?.name} isNew={index<2} isFavorite={p.favorites.includes(product.id)} onSelect={()=>p.onSelect(product)} onFavorite={()=>p.onFavorite(product.id)} onAdd={()=>p.onAdd(product)}/>)}</div>}
-  {p.count>9&&<div className="pagination"><button disabled={p.page===1} onClick={()=>p.onPage(p.page-1)}>Previous</button><span>Page {p.page} of {pages}</span><button disabled={p.page>=pages} onClick={()=>p.onPage(p.page+1)}>Next</button></div>}
- </section>}
+export default function CatalogView(p: Props) {
+  const pages = Math.ceil(p.count / 9);
+  const { t } = useI18n();
+  return (
+    <section className="catalog" id="shop">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Shop all</p>
+          <h2>Designed to belong.</h2>
+        </div>
+        <p>
+          {p.count} considered {p.count === 1 ? "piece" : "pieces"}, each
+          selected for lasting quality.
+        </p>
+      </div>
+      <div className="shop-tools">
+        <div className="search-box">
+          <Icon name="search" size={19} />
+          <input
+            id="search"
+            value={p.query}
+            onChange={(e) => p.onQuery(e.target.value)}
+            placeholder={t.search}
+          />
+        </div>
+        <div className="selects">
+          <select
+            aria-label="Filter by category"
+            value={p.typeId || ""}
+            onChange={(e) => p.onType(e.target.value ? +e.target.value : null)}
+          >
+            <option value="">{t.allCategories}</option>
+            {p.types.map((x) => (
+              <option key={x.id} value={x.id}>
+                {x.name}
+              </option>
+            ))}
+          </select>
+          <select
+            aria-label="Filter by brand"
+            value={p.brandId || ""}
+            onChange={(e) => p.onBrand(e.target.value ? +e.target.value : null)}
+          >
+            <option value="">{t.allMakers}</option>
+            {p.brands.map((x) => (
+              <option key={x.id} value={x.id}>
+                {x.name}
+              </option>
+            ))}
+          </select>
+          <select
+            aria-label="Sort products"
+            value={p.sort}
+            onChange={(e) => p.onSort(e.target.value)}
+          >
+            <option value="featured">{t.featured}</option>
+            <option value="price-low">Price: low to high</option>
+            <option value="price-high">Price: high to low</option>
+            <option value="rating">Top rated</option>
+          </select>
+        </div>
+      </div>
+      {(p.brandId || p.typeId || p.query) && (
+        <div className="active-filter">
+          <span>Showing a refined selection</span>
+          <button onClick={p.onClear}>
+            Clear filters <Icon name="close" size={14} />
+          </button>
+        </div>
+      )}
+      {p.loading ? (
+        <div className="product-grid">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div className="skeleton" key={i}>
+              <div />
+              <span />
+              <small />
+            </div>
+          ))}
+        </div>
+      ) : p.error ? (
+        <div className="empty">
+          <div>↗</div>
+          <h3>The collection is taking a moment</h3>
+          <p>{p.error}</p>
+          <button className="outline" onClick={() => location.reload()}>
+            Try again
+          </button>
+        </div>
+      ) : p.devices.length === 0 ? (
+        <div className="empty">
+          <h3>No pieces found</h3>
+          <p>Try another search or clear the current filters.</p>
+          <button className="outline" onClick={p.onClear}>
+            View everything
+          </button>
+        </div>
+      ) : (
+        <div className="product-grid">
+          {p.devices.map((product, index) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              brandName={p.brands.find((b) => b.id === product.brandId)?.name}
+              isNew={index < 2}
+              isFavorite={p.favorites.includes(product.id)}
+              onSelect={() => p.onSelect(product)}
+              onFavorite={() => p.onFavorite(product.id)}
+              onAdd={() => p.onAdd(product)}
+            />
+          ))}
+        </div>
+      )}
+      {p.count > 9 && (
+        <div className="pagination">
+          <button disabled={p.page === 1} onClick={() => p.onPage(p.page - 1)}>
+            Previous
+          </button>
+          <span>
+            Page {p.page} of {pages}
+          </span>
+          <button
+            disabled={p.page >= pages}
+            onClick={() => p.onPage(p.page + 1)}
+          >
+            Next
+          </button>
+        </div>
+      )}
+    </section>
+  );
+}
