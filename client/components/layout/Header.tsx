@@ -1,57 +1,11 @@
 "use client";
-
-import type { Taxonomy } from "@/lib/api";
 import Link from "next/link";
-import { localizedPath, useI18n } from "@/lib/i18n";
+import type { Taxonomy } from "@/lib/api";
+import { localizedPath,useI18n } from "@/lib/i18n";
 import LanguageSwitcher from "./LanguageSwitcher";
 
-type HeaderProps = {
-  brands: Taxonomy[];
-  types: Taxonomy[];
-  cartCount: number;
-  onAccountOpen: () => void;
-  onCartOpen: () => void;
-};
+type Props={brands:Taxonomy[];types:Taxonomy[];cartCount:number;onAccountOpen:()=>void;onCartOpen:()=>void};
+function HeaderIcon({name}:{name:"search"|"user"|"bag"}){const paths={search:<><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></>,user:<><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></>,bag:<><path d="M6 8h12l1 13H5L6 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></>};return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>{paths[name]}</svg>}
 
-function HeaderIcon({ name }: { name: "search" | "user" | "bag" }) {
-  const paths = {
-    search: <><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></>,
-    user: <><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></>,
-    bag: <><path d="M6 8h12l1 13H5L6 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></>,
-  };
-  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>{paths[name]}</svg>;
-}
-
-export default function Header({ brands, types, cartCount, onAccountOpen, onCartOpen }: HeaderProps) {
-  const { locale, t } = useI18n();
-  return <>
-    <div className="announcement">Complimentary delivery on orders over $150 <span>Explore the edit →</span></div>
-    <header className="header">
-      <Link href={localizedPath(locale,"/")} className="logo">ATELIER<span>MARKET</span></Link>
-      <nav>
-        <a href="#shop">{t.newArrivals}</a>
-        <div className="nav-menu">
-          <button>{t.brands} <span>⌄</span></button>
-          <div className="nav-dropdown">
-            <p>{t.shopByMaker}</p>
-            {brands.length ? brands.map(item => <Link key={item.id} href={localizedPath(locale,`/brands/${item.id}`)}>{item.name}<span>→</span></Link>) : <small>{t.noBrands}</small>}
-          </div>
-        </div>
-        <div className="nav-menu">
-          <button>{t.categories} <span>⌄</span></button>
-          <div className="nav-dropdown">
-            <p>{t.shopByCategory}</p>
-            {types.length ? types.map(item => <Link key={item.id} href={localizedPath(locale,`/types/${item.id}`)}>{item.name}<span>→</span></Link>) : <small>{t.noCategories}</small>}
-          </div>
-        </div>
-        <a href="#story">{t.story}</a>
-      </nav>
-      <div className="header-actions">
-        <LanguageSwitcher/>
-        <button aria-label="Search" onClick={() => document.getElementById("search")?.focus()}><HeaderIcon name="search"/></button>
-        <button aria-label="Account" onClick={onAccountOpen}><HeaderIcon name="user"/></button>
-        <button aria-label="Shopping bag" className="count-button" onClick={onCartOpen}><HeaderIcon name="bag"/><b>{cartCount}</b></button>
-      </div>
-    </header>
-  </>;
-}
+export default function Header({brands,types,cartCount,onAccountOpen,onCartOpen}:Props){const{locale,t}=useI18n();return <><div className="flex h-8 items-center justify-center gap-5 bg-[#24241f] text-[10px] uppercase tracking-[.09em] text-[#f8f3e9]">Complimentary delivery on orders over $150 <span className="hidden text-[#d8c8ad] sm:inline">Explore the edit →</span></div><header className="sticky top-0 z-20 flex h-[88px] items-center justify-between border-b border-[#d8d2c5] bg-[#fbfaf6]/95 px-[5.5vw] backdrop-blur-xl"><Link href={localizedPath(locale,"/")} className="flex flex-col font-serif text-[22px] font-semibold leading-[.73] tracking-[.08em]">ATELIER<span className="mt-2 font-sans text-[7px] tracking-[.36em]">MARKET</span></Link><nav className="hidden h-full items-center gap-9 text-xs lg:flex"><a className="hover:text-[#b95736]" href="#shop">{t.newArrivals}</a><Menu label={t.brands} title={t.shopByMaker} empty={t.noBrands} items={brands} href={id=>localizedPath(locale,`/brands/${id}`)}/><Menu label={t.categories} title={t.shopByCategory} empty={t.noCategories} items={types} href={id=>localizedPath(locale,`/types/${id}`)}/><a className="hover:text-[#b95736]" href="#story">{t.story}</a></nav><div className="flex items-center gap-2 sm:gap-4"><LanguageSwitcher/><button className="p-1" aria-label="Search" onClick={()=>document.getElementById("search")?.focus()}><HeaderIcon name="search"/></button><button className="p-1" aria-label="Account" onClick={onAccountOpen}><HeaderIcon name="user"/></button><button className="flex items-center gap-1 p-1" aria-label="Shopping bag" onClick={onCartOpen}><HeaderIcon name="bag"/><b className="grid min-h-[17px] min-w-[17px] place-items-center rounded-full bg-[#b95736] px-1 text-[9px] text-white">{cartCount}</b></button></div></header></>}
+function Menu({label,title,empty,items,href}:{label:string;title:string;empty:string;items:Taxonomy[];href:(id:number)=>string}){return <div className="group relative flex h-full items-center"><button className="flex items-center gap-2">{label}<span className="text-[#b95736]">⌄</span></button><div className="invisible absolute top-[75px] left-1/2 w-[230px] -translate-x-1/2 translate-y-2 border border-[#d8d2c5] bg-[#fbfaf6] p-5 opacity-0 shadow-xl transition-all group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"><p className="mb-3 border-b border-[#d8d2c5] pb-2 text-[8px] uppercase tracking-[.16em] text-[#b95736]">{title}</p>{items.length?items.map(item=><Link className="flex justify-between py-2 font-serif text-base transition-all hover:pl-1 hover:text-[#b95736]" key={item.id} href={href(item.id)}>{item.name}<span className="font-sans text-xs">→</span></Link>):<small className="block py-2 text-[#716f67]">{empty}</small>}</div></div>}
