@@ -18,8 +18,19 @@ export default function ProductDetailsView({ id }: { id: string }) {
     api.devices.get(id).then(setProduct).catch(error => setError(error instanceof Error ? error.message : "Product not found")) .finally(() => setLoading(false));
   }, [id]);
 
-  const addToCart = () => {
+  const addToCart = async () => {
     if (!product) return;
+    const token = localStorage.getItem("atelier-token");
+    if (token) {
+      try {
+        await api.basket.add(product.id, token);
+        setAdded(true);
+        setTimeout(() => setAdded(false), 2000);
+      } catch (error) {
+        setError(error instanceof Error ? error.message : "Could not update your basket");
+      }
+      return;
+    }
     const cart = JSON.parse(localStorage.getItem("atelier-cart") || "[]") as Array<Device & { quantity: number }>;
     const existing = cart.find(item => item.id === product.id);
     const next = existing ? cart.map(item => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item) : [...cart, { ...product, quantity: 1 }];

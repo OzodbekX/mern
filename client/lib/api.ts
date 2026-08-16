@@ -8,6 +8,8 @@ export type DeviceList = { count:number; rows:Device[] };
 export type AuthPayload = { email:string; password:string; role?:string };
 export type DeviceFilters = { page?:number; limit?:number; brandId?:number; typeId?:number };
 export type CreateDevicePayload = { name:string; price:number|string; brandId:number|string; typeId:number|string; img:File; info?:DeviceInfo[] };
+export type BasketDevice = { id:number; basketId:number; deviceId:number; device:Device };
+export type Basket = { id:number; userId:number; basket_devices:BasketDevice[] };
 
 export class ApiError extends Error {
   constructor(message:string, public status:number, public data:unknown) { super(message); this.name="ApiError"; }
@@ -47,6 +49,12 @@ export const api={
     create:(payload:CreateDevicePayload)=>{const form=new FormData();form.set("name",payload.name);form.set("price",String(payload.price));form.set("brandId",String(payload.brandId));form.set("typeId",String(payload.typeId));form.set("img",payload.img);if(payload.info)form.set("info",JSON.stringify({array:payload.info}));return request<Device>("/device",{method:"POST",body:form})},
     update:(id:number|string,payload:Partial<Omit<CreateDevicePayload,"img">>)=>request<{message:string;id:string}>(`/device/${id}`,{method:"PUT",body:JSON.stringify(payload)}),
     remove:(id:number|string)=>request<unknown>(`/device/${id}`,{method:"DELETE"}),
+  },
+  basket:{
+    get:(token:string)=>request<Basket>("/basket",{},token),
+    add:(deviceId:number,token:string)=>request<Basket>("/basket",{method:"POST",body:JSON.stringify({deviceId})},token),
+    remove:(deviceId:number,token:string)=>request<Basket>(`/basket/${deviceId}`,{method:"DELETE"},token),
+    clear:(token:string)=>request<{message:string;removed:number}>("/basket",{method:"DELETE"},token),
   },
 };
 
