@@ -11,6 +11,7 @@ import StoryView from "@/components/views/StoryView";
 import ProductModal from "@/components/modals/ProductModal";
 import CartDrawer, { type CartItem } from "@/components/modals/CartDrawer";
 import AuthModal from "@/components/modals/AuthModal";
+import CheckoutModal from "@/components/modals/CheckoutModal";
 
 const parseFilter = (value: string | null) => {
   const parsed = Number(value);
@@ -41,6 +42,7 @@ export default function Marketplace() {
   const [favorites, setFavorites] = useState<number[]>([]);
   const [toast, setToast] = useState("");
   const [user, setUser] = useState<User | null>(null);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
 
   useEffect(() => {
     Promise.resolve().then(() => {
@@ -185,7 +187,8 @@ export default function Marketplace() {
 
     {toast && <div className="toast">✓ {toast}</div>}
     {selected && <ProductModal product={selected} brand={brands.find(item => item.id === selected.brandId)?.name} close={() => setSelected(null)} add={() => { addToCart(selected); setSelected(null); }}/>} 
-    {cartOpen && <CartDrawer cart={cart} total={cartTotal} close={() => setCartOpen(false)} update={updateCart} clear={clearCart}/>} 
+    {cartOpen && <CartDrawer cart={cart} total={cartTotal} close={() => setCartOpen(false)} update={updateCart} clear={clearCart} checkout={() => { setCartOpen(false); setCheckoutOpen(true); }}/>} 
     {authOpen && <AuthModal close={() => setAuthOpen(false)} onAuthenticated={loadAuthenticatedBasket}/>} 
+    {checkoutOpen && <CheckoutModal cart={cart} total={cartTotal} close={() => setCheckoutOpen(false)} onPaid={clearCart}/>} 
   </main>;
 }

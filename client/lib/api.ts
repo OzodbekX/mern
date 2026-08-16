@@ -12,6 +12,12 @@ export type DeviceFilters = { page?:number; limit?:number; brandId?:number; type
 export type CreateDevicePayload = { name:string; price:number|string; brandId:number|string; typeId:number|string; img:File; info?:DeviceInfo[] };
 export type BasketDevice = { id:number; basketId:number; deviceId:number; device:Device };
 export type Basket = { id:number; userId:number; basket_devices:BasketDevice[] };
+export type SavedCard = { id:number; holderName:string; brand:string; last4:string; expiryMonth:number; expiryYear:number; isDefault:boolean; userId:number; createdAt:string; updatedAt:string };
+export type CardPayload = { holderName:string; brand:string; last4:string; expiryMonth:number; expiryYear:number; isDefault?:boolean };
+export type OrderItem = { deviceId:number; quantity:number; price:number };
+export type PaymentCard = { number:string; expiryMonth:number; expiryYear:number; password:string };
+export type PendingOrder = { success:true; message:string; transactionId:string; status:"PENDING_VERIFICATION"; verificationCode:string };
+export type PaidOrder = { success:true; message:string; transactionId:string; orderId:number; status:"PAID"; amount:string; card?:{id:number;brand:string;last4:string} };
 
 export class ApiError extends Error {
   constructor(message:string, public status:number, public data:unknown) { super(message); this.name="ApiError"; }
@@ -57,6 +63,18 @@ export const api={
     add:(deviceId:number,token:string)=>request<Basket>("/basket",{method:"POST",body:JSON.stringify({deviceId})},token),
     remove:(deviceId:number,token:string)=>request<Basket>(`/basket/${deviceId}`,{method:"DELETE"},token),
     clear:(token:string)=>request<{message:string;removed:number}>("/basket",{method:"DELETE"},token),
+  },
+  cards:{
+    list:(token:string)=>request<SavedCard[]>("/card",{},token),
+    get:(id:number,token:string)=>request<SavedCard>(`/card/${id}`,{},token),
+    create:(payload:CardPayload,token:string)=>request<SavedCard>("/card",{method:"POST",body:JSON.stringify(payload)},token),
+    update:(id:number,payload:Partial<CardPayload>,token:string)=>request<SavedCard>(`/card/${id}`,{method:"PUT",body:JSON.stringify(payload)},token),
+    remove:(id:number,token:string)=>request<{message:string}>(`/card/${id}`,{method:"DELETE"},token),
+  },
+  orders:{
+    create:(payload:{items:OrderItem[];amount:number;card:PaymentCard},token:string)=>request<PendingOrder>("/order",{method:"POST",body:JSON.stringify(payload)},token),
+    purchaseWithSavedCard:(payload:{items:OrderItem[];amount:number;cardId:number},token:string)=>request<PaidOrder>("/order/saved-card",{method:"POST",body:JSON.stringify(payload)},token),
+    verify:(payload:{transactionId:string;verificationCode:string},token:string)=>request<PaidOrder>("/order/verify",{method:"POST",body:JSON.stringify(payload)},token),
   },
 };
 
