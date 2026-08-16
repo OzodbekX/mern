@@ -1,12 +1,16 @@
+const fs = require('fs');
+const path = require('path');
 const brands = require('./brands');
 const types = require('./types');
 
-const images = [
-    'ea893f66-352d-4e4e-9d1f-aaa9afbbe696.jpg',
-    'e6420c70-9798-42c0-9cd6-864c1eea9c12.jpg',
-    '94648d0d-b4b4-4dc6-b5bd-62dcad916e08.jpg',
-    '136acb0f-03f7-46cd-8b32-6d0995fc1fdc.jpg'
-];
+const staticDirectory = path.resolve(__dirname, '../../static');
+const images = fs.readdirSync(staticDirectory)
+    .filter((fileName) => /\.(jpe?g|png|webp|gif)$/i.test(fileName))
+    .sort();
+
+if (images.length === 0) {
+    throw new Error(`No seed images found in ${staticDirectory}`);
+}
 
 // Twenty products for each of the ten types gives exactly 200 devices.
 module.exports = Array.from({ length: 200 }, (_, index) => {
